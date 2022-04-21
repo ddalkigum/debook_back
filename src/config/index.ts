@@ -30,7 +30,8 @@ if (!envFound || envFound.error) {
 }
 
 import serverConfig from './server';
-import dbConfig from './db';
+import dbConfig from './mariaDB';
 import authConfig from './auth';
+import redisConfig from './redisDB';
 
-export { serverConfig, dbConfig, authConfig };
+export { serverConfig, dbConfig, authConfig, redisConfig };

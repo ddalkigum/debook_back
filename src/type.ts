@@ -4,4 +4,5 @@ export const TYPES = {
   WinstonLogger: Symbol.for('WinstonLogger'),
   MorganLogger: Symbol.for('MorganLogger'),
   MariaDB: Symbol.for('MariaDB'),
+  RedisDB: Symbol.for('RedisDB'),
 };

@@ -6,7 +6,7 @@ export default class TokenEntity {
   @PrimaryColumn({ type: 'varchar', length: 36 })
   id: string;
 
-  @Column({ type: 'int', length: 10 })
+  @Column({ type: 'int' })
   userID: number;
 
   @Column({ type: 'varchar', length: 250 })

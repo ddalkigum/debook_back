@@ -14,6 +14,6 @@ export const dataSource = new DataSource({
   host: config.dbConfig.host,
   port: config.dbConfig.port,
   charset: 'utf8mb4',
-  synchronize: NODE_ENV === ('test' || 'local') ? true : false,
+  synchronize: NODE_ENV === 'production' ? false : true,
   entities: [path.join(__dirname, './entity/**/*.{ts,js}')],
 });
