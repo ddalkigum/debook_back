@@ -25,7 +25,7 @@ export class ExpressServer implements IServer {
     this.app.use(this.morganLogger.init());
   };
 
-  public start = (port: number) => {
+  public start = (port: string) => {
     this.app.listen(port);
     this.logger.info(`Server on ${port}, environment: ${process.env.NODE_ENV}`);
   };

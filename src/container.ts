@@ -9,6 +9,9 @@ import { MorganLogger } from './infrastructure/logger/morgan';
 
 export const container = new Container({ defaultScope: 'Singleton' });
 
+// Infrastructure
 container.bind<IServer>(TYPES.Server).to(ExpressServer);
 container.bind<IWinstonLogger>(TYPES.WinstonLogger).to(WinstonLogger);
 container.bind<IMorganLogger>(TYPES.MorganLogger).to(MorganLogger);
+
+// Domain
