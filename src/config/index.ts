@@ -1,5 +1,4 @@
 import dotenv from 'dotenv';
-import serverConfig from './server';
 
 const PRODUCTION = 'production';
 const DEVELOPMENT = 'development';
@@ -30,4 +29,7 @@ if (!envFound || envFound.error) {
   throw new Error(`Couldn.t find ${envPath} file`);
 }
 
-export { serverConfig };
+import serverConfig from './server';
+import dbConfig from './db';
+
+export { serverConfig, dbConfig };

@@ -4,7 +4,7 @@ import { TYPES } from '../../type';
 import { IMorganLogger, IWinstonLogger } from './interface';
 
 @injectable()
-export class MorganLogger implements IMorganLogger {
+export default class MorganLogger implements IMorganLogger {
   @inject(TYPES.WinstonLogger) private logger: IWinstonLogger;
 
   stream: Morgan.StreamOptions = {
