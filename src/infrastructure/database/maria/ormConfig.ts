@@ -1,12 +1,12 @@
 import path from 'path';
-import { DataSourceOptions } from 'typeorm';
+import { DataSource, DataSourceOptions } from 'typeorm';
 import * as config from '../../../config';
 
 const MARIA_DB = 'mariadb';
 const { NODE_ENV } = process.env;
 const TEST_DATABASE = 'goback_text';
 
-export const connectionOption: DataSourceOptions = {
+export const dataSource = new DataSource({
   type: MARIA_DB,
   database: NODE_ENV === 'test' ? TEST_DATABASE : config.dbConfig.database,
   username: config.dbConfig.username,
@@ -16,4 +16,4 @@ export const connectionOption: DataSourceOptions = {
   charset: 'utf8mb4',
   synchronize: NODE_ENV === 'test' ? true : false,
   entities: [path.join(__dirname, './entity/**/*.{ts,js}')],
-};
+});
