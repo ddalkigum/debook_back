@@ -9,7 +9,7 @@
     "start:dev": "export NODE_ENV=development && ts-node ./src/server.ts",
     "start:local": "export NODE_ENV=local && nodemon ./src/server.ts",
     "start:test": "export NODE_ENV=test && nodemon ./src/server.ts",
-    "test:unit": "export NODE_ENV=test && jest --config jest.unit.config.json --detectOpenHandles",
+    "test:unit": "export NODE_ENV=test && jest --config jest.unit.config.json --detectOpenHandles --silent",
     "test:integration": "export NODE_ENV=test && jest --config jest.integration.config.json --detectOpenHandles",
     "docker:start": "docker-compose up -d",
     "docker:stop": "docker-compose down"
@@ -37,6 +37,7 @@
     "@types/jest": "^27.4.1",
     "@types/jsonwebtoken": "^8.5.1",
     "@types/morgan": "^1.9.3",
+    "@types/uuid": "^8.3.4",
     "ts-jest": "^27.1.4",
     "typescript": "^4.6.3"
   }
