@@ -31,5 +31,6 @@ if (!envFound || envFound.error) {
 
 import serverConfig from './server';
 import dbConfig from './db';
+import authConfig from './auth';
 
-export { serverConfig, dbConfig };
+export { serverConfig, dbConfig, authConfig };

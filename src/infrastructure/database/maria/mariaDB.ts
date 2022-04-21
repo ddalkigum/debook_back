@@ -38,7 +38,7 @@ export default class MariaDB implements IMariaDB {
 
     const queryRunner = this.connection.createQueryRunner();
     try {
-      await queryRunner.query(`DROP TABLE ${tableName}`);
+      await queryRunner.query(`DELETE FROM ${tableName}`);
     } finally {
       await queryRunner.release();
     }
