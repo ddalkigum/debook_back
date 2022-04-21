@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 const PRODUCTION = 'production';
 const DEVELOPMENT = 'development';
 const LOCAL = 'local';
-const TEST = 'local';
+const TEST = 'test';
 
 const { NODE_ENV } = process.env;
 
@@ -16,7 +16,7 @@ const getPath = (environment: string) => {
     case LOCAL:
       return '.env.local';
     case TEST:
-      return '.env.test';
+      return '.env.local';
     default:
       throw new Error('Environment is incorrect defined');
   }

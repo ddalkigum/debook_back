@@ -1,10 +1,10 @@
 import path from 'path';
-import { DataSource, DataSourceOptions } from 'typeorm';
+import { DataSource } from 'typeorm';
 import * as config from '../../../config';
 
 const MARIA_DB = 'mariadb';
 const { NODE_ENV } = process.env;
-const TEST_DATABASE = 'goback_text';
+const TEST_DATABASE = 'goback_test';
 
 export const dataSource = new DataSource({
   type: MARIA_DB,
