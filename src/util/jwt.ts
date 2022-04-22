@@ -10,7 +10,7 @@ interface RefreshTokenPayload {
   tokenID: string;
 }
 
-const generateAccessToken = (payload: AccessTokenPayload, issuer: string) => {
+export const generateAccessToken = (payload: AccessTokenPayload, issuer: string) => {
   return jwt.sign({ user_id: payload.userID }, config.authConfig.jwtSignKey, {
     expiresIn: '2h',
     issuer,
@@ -18,12 +18,10 @@ const generateAccessToken = (payload: AccessTokenPayload, issuer: string) => {
   });
 };
 
-const generateRefreshToken = (payload: RefreshTokenPayload, issuer: string) => {
+export const generateRefreshToken = (payload: RefreshTokenPayload, issuer: string) => {
   return jwt.sign({ user_id: payload.userID, token_id: payload.tokenID }, config.authConfig.jwtSignKey, {
     expiresIn: '60d',
     issuer,
     subject: 'refresh_token',
   });
 };
-
-export { generateAccessToken, generateRefreshToken };

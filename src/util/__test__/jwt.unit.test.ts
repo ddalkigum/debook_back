@@ -11,7 +11,7 @@ describe('Access token test', () => {
   };
   const issuer = 'goback';
   test('Should return access token', () => {
-    const accessToken = util.jwtUtil.generateAccessToken(payload, issuer);
+    const accessToken = util.generateAccessToken(payload, issuer);
     logger.debug(accessToken);
     expect(accessToken.startsWith('ey')).toBeTruthy();
   });
@@ -25,7 +25,7 @@ describe('Refresh token test', () => {
   const issuer = 'goback';
 
   test('Should return refresh token', () => {
-    const refreshToken = util.jwtUtil.generateRefreshToken(payload, issuer);
+    const refreshToken = util.generateRefreshToken(payload, issuer);
     logger.debug(refreshToken);
     expect(refreshToken.startsWith('ey')).toBeTruthy();
   });
