@@ -33,5 +33,6 @@ import serverConfig from './server';
 import dbConfig from './mariaDB';
 import authConfig from './auth';
 import redisConfig from './redisDB';
+import awsConfig from './aws';
 
-export { serverConfig, dbConfig, authConfig, redisConfig };
+export { serverConfig, dbConfig, authConfig, redisConfig, awsConfig };
