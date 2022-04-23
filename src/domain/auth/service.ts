@@ -18,8 +18,12 @@ export default class AuthService implements IAuthService {
     return code;
   };
 
-  public getAuthCode = async (code: string) => {
+  public getEmail = async (code: string) => {
     this.logger.debug(`AuthService, getAuthCode`);
+    const email = await this.authRepository.getEmailOnRedis(code);
+
+    await this.authRepository.deleteAuthCode(code);
+    return email;
   };
 
   public sendEmail = async (email: string, code: string) => {};
@@ -33,5 +37,27 @@ export default class AuthService implements IAuthService {
 
     // 2. Insert token
     return await this.authRepository.insertToken(tokenID, accessToken, refreshToken);
+  };
+
+  public login = async (email: string) => {
+    // TODO: UserRepository.findUserByEmail
+    const userFound = true;
+    // !User -> insert user -> insert token
+    let user;
+    if (!userFound) {
+      user = { id: 1 };
+      // const user = this.userRepository.insertUser(email)
+    }
+    const accessToken = util.generateAccessToken({ userID: user.id }, config.serverConfig.baseURL);
+    const tokenID = util.generageUUID();
+    const refreshToken = util.generateRefreshToken({ userID: user.id, tokenID }, config.serverConfig.baseURL);
+
+    if (!userFound) {
+      await this.authRepository.insertToken(tokenID, accessToken, refreshToken);
+    } else {
+      await this.authRepository.updateToken();
+    }
+
+    // User -> update token
   };
 }

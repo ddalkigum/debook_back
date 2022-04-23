@@ -4,6 +4,7 @@ import { IHttpRouter } from '../interface';
 import * as util from '../../util';
 import { TYPES } from '../../type';
 import { IAuthService } from './interface';
+import { Constants } from '../../constants';
 
 @injectable()
 export default class AuthRouter implements IHttpRouter {
@@ -16,18 +17,63 @@ export default class AuthRouter implements IHttpRouter {
       return response.send('Success');
     });
 
-    // TODO: Send email - use aws ses
     this.router.post('/send-email', async (request: Request, response: Response, next: NextFunction) => {
       const { email } = request.body;
       util.checkRequired([email]);
-      // Send Email
-      const code = await this.authService.setAuthCode(email);
-      return await this.authService.sendEmail(email, code);
+      const code = util.generateHexString(10);
+      const status = await this.authService.setCertification(email, code);
+      await this.authService.sendEmail(status, email, code);
     });
 
-    // TODO: Email Login
-    this.router.get('/email', (request: Request, response: Response, next: NextFunction) => {
-      const { code } = request.query;
+    this.router.get('/check', async (request: Request, response: Response, next: NextFunction) => {
+      const code = request.query.code as string;
+      const certification = await this.authService.getCertification(code);
+
+      if (!certification) {
+        return 'DoesNotExist';
+      }
+
+      return certification;
+    });
+
+    this.router.get('/signin/email', async (request: Request, response: Response, next: NextFunction) => {
+      const code = request.query.code as string;
+
+      util.checkRequired([code]);
+
+      const certification = await this.authService.getCertification(code);
+
+      if (!certification) {
+        return 'DoesNotExist';
+      }
+
+      if (certification.status !== Constants.SIGNIN) {
+        return 'IncorrectAccess';
+      }
+      const result = await this.authService.signin(code, certification.email);
+      response.cookie(Constants.ACCESS_TOKEN, result.accessToken, { maxAge: 1000 * 60 * 60 * 24 * 7 });
+      return { nickname: result.nickname, email: result.email };
+    });
+
+    this.router.post('/signup/email', async (request: Request, response: Response, next: NextFunction) => {
+      const { code, email, nickname } = request.body;
+
+      util.checkRequired([code, email, nickname]);
+
+      const certification = await this.authService.getCertification(code);
+
+      if (!certification) {
+        return 'DoesNotExist';
+      }
+
+      if (certification.status !== Constants.SIGNIN) {
+        return 'IncorrectAccess';
+      }
+
+      const result = await this.authService.signup(code, email, nickname);
+      response.cookie(Constants.ACCESS_TOKEN, result.accessToken, { maxAge: 1000 * 60 * 60 * 24 * 7 });
+
+      return { nickname: result.nickname, email: result.email };
     });
 
     // TODO: Google login

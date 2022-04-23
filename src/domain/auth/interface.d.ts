@@ -1,15 +1,22 @@
+import { Constants } from '../../constants';
+import CertificationEntity from '../../infrastructure/database/maria/entity/auth/certification';
 import TokenEntity from '../../infrastructure/database/maria/entity/auth/token';
+import UserEntity from '../../infrastructure/database/maria/entity/user/user';
+
+// @FIXME: 이름 마음에 안드는데
+type ISignup = Omit<UserEntity, 'id'> & Omit<TokenEntity, 'id'>;
 
 export interface IAuthService {
-  setAuthCode: (email: string) => Promise<string>;
-  getEmailOnRedis: (code: string) => Promise<>;
-  sendEmail: (email: string, code: string) => Promise<void>;
-  setToken: (userID: number) => Promise<TokenEntity>;
+  setCertification: (email: string, code: string) => Promise<Constants>;
+  sendEmail: (status: Constants, email: string, code: string) => Promise<void>;
+  getCertification: (code: string) => Promise<CertificationEntity>;
+  signup: (code: string, email: string, nickname: string) => Promise<ISignup>;
+  signin: (code: string, email: string) => Promise<ISignup>;
 }
 
 export interface IAuthRepository {
-  insertAuthCode: (email: string, code: string) => Promise<void>;
-  getEmail: (code: string) => Promise<string>;
-  deleteAuthCode: (code: string) => Promise<void>;
-  insertToken: (tokenID: strinb, accessToken: string, refreshToken: string) => Promise<TokenEntity>;
+  insertCertification: (code: string, email: string) => Promise<any>;
+  getCertification: (code: string) => Promise<CertificationEntity>;
+  deleteCertification: (code: string) => Promise<void>;
+  updateToken: (userID: number, accessToken: string, refreshToken: string) => Promise<>;
 }

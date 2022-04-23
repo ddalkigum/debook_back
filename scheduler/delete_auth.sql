@@ -1,0 +1,6 @@
+CREATE EVENT IF NOT EXISTS delete_auth
+  ON SCHEDULE 15 MINUTE
+  ON COMPLETION PRESERVE ENABLE
+  COMMENT "회원가입, 로그인시 코드 유효기간 지나면 삭제"
+  DO
+    DELETE FROM auth WHERE 

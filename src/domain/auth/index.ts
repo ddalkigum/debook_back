@@ -1,5 +1,3 @@
-import Router from './router';
-import Service from './service';
-import Repository from './repository';
-
-export { Router, Service, Repository };
+export { default as Router } from './router';
+export { default as Service } from './service';
+export { default as Repository } from './repository';
