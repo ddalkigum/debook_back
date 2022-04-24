@@ -4,4 +4,4 @@ const generageUUID = () => {
   return uuid.v4();
 };
 
-export default generageUUID;
+export default { generageUUID };

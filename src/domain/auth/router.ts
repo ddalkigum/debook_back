@@ -22,7 +22,7 @@ export default class AuthRouter implements IHttpRouter {
       const { email } = request.body;
       util.checkRequired([email]);
 
-      const code = util.generateHexString(10);
+      const code = util.hex.generateHexString(10);
       const status = await this.authService.setCertification(email, code);
       await this.authService.sendEmail(code, email, status);
     });

@@ -15,7 +15,7 @@ export interface IAuthService {
 }
 
 export interface IAuthRepository {
-  insertCertification: (code: string, email: string) => Promise<any>;
+  insertCertification: (code: string, email: string) => Promise<Constants>;
   getCertification: (code: string) => Promise<CertificationEntity>;
   deleteCertification: (code: string) => Promise<void>;
   insertToken: (accessToken, refreshToken, tokenID, userID) => Promise<Partial<TokenEntity>>;

@@ -7,4 +7,4 @@ const generateHexString = (length: number): string => {
   return output;
 };
 
-export default generateHexString;
+export default { generateHexString };

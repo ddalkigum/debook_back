@@ -4,20 +4,15 @@ import { TYPES } from '../../type';
 import { IAuthRepository, IAuthService } from './interface';
 import * as util from '../../util';
 import * as config from '../../config';
-import { Constants } from '../../constants';
-import TokenEntity from '../../infrastructure/database/maria/entity/auth/token';
 
 @injectable()
 export default class AuthService implements IAuthService {
   @inject(TYPES.WinstonLogger) private logger: IWinstonLogger;
   @inject(TYPES.AuthRepository) private authRepository: IAuthRepository;
 
-  public setAuthCode = async (email: string) => {
+  public setCertification = async (code: string, email: string) => {
     this.logger.debug(`AuthService, setAuthCode`);
-    const code = util.generateHexString(10);
-
-    await this.authRepository.insertCertification(email, code);
-    return code;
+    return await this.authRepository.insertCertification(email, code);
   };
 
   public sendEmail = async (email: string, code: string) => {};
@@ -33,7 +28,7 @@ export default class AuthService implements IAuthService {
     // Insert user
     const user = await this.userRepository.insertUser(email, nickname);
     // Insert token
-    const tokenID = util.uuid();
+    const tokenID = util.uuid.generageUUID();
     const { accessToken, refreshToken } = util.token.getAuthTokenSet(
       { userID: user.id, tokenID },
       config.serverConfig.baseURL
@@ -50,7 +45,7 @@ export default class AuthService implements IAuthService {
     // Get user
     const user = await this.userRepository.getUser(email);
     // Update token
-    const tokenID = util.uuid();
+    const tokenID = util.uuid.generageUUID();
     const { accessToken, refreshToken } = util.token.getAuthTokenSet(
       { userID: user.id, tokenID },
       config.serverConfig.baseURL
