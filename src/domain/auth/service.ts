@@ -4,6 +4,8 @@ import { TYPES } from '../../type';
 import { IAuthRepository, IAuthService } from './interface';
 import * as util from '../../util';
 import * as config from '../../config';
+import { Constants } from '../../constants';
+import TokenEntity from '../../infrastructure/database/maria/entity/auth/token';
 
 @injectable()
 export default class AuthService implements IAuthService {
@@ -14,50 +16,50 @@ export default class AuthService implements IAuthService {
     this.logger.debug(`AuthService, setAuthCode`);
     const code = util.generateHexString(10);
 
-    await this.authRepository.insertAuthCode(email, code);
+    await this.authRepository.insertCertification(email, code);
     return code;
-  };
-
-  public getEmail = async (code: string) => {
-    this.logger.debug(`AuthService, getAuthCode`);
-    const email = await this.authRepository.getEmailOnRedis(code);
-
-    await this.authRepository.deleteAuthCode(code);
-    return email;
   };
 
   public sendEmail = async (email: string, code: string) => {};
 
-  public setToken = async (userID: number) => {
-    this.logger.debug(`AuthService, settoken`);
-    // 1. Generate accessToken -> Random hex -> RefreshToken
-    const accessToken = util.generateAccessToken({ userID }, config.serverConfig.baseURL);
-    const tokenID = util.generateHexString(10);
-    const refreshToken = util.generateRefreshToken({ userID, tokenID }, config.serverConfig.baseURL);
+  public getCertification = async (code: string) => {
+    this.logger.debug(`AuthService, getAuthCode`);
+    const certification = await this.authRepository.getCertification(code);
 
-    // 2. Insert token
-    return await this.authRepository.insertToken(tokenID, accessToken, refreshToken);
+    return certification;
   };
 
-  public login = async (email: string) => {
-    // TODO: UserRepository.findUserByEmail
-    const userFound = true;
-    // !User -> insert user -> insert token
-    let user;
-    if (!userFound) {
-      user = { id: 1 };
-      // const user = this.userRepository.insertUser(email)
-    }
-    const accessToken = util.generateAccessToken({ userID: user.id }, config.serverConfig.baseURL);
-    const tokenID = util.generageUUID();
-    const refreshToken = util.generateRefreshToken({ userID: user.id, tokenID }, config.serverConfig.baseURL);
+  public signup = async (code: string, email: string, nickname: string) => {
+    // Insert user
+    const user = await this.userRepository.insertUser(email, nickname);
+    // Insert token
+    const tokenID = util.uuid();
+    const { accessToken, refreshToken } = util.token.getAuthTokenSet(
+      { userID: user.id, tokenID },
+      config.serverConfig.baseURL
+    );
 
-    if (!userFound) {
-      await this.authRepository.insertToken(tokenID, accessToken, refreshToken);
-    } else {
-      await this.authRepository.updateToken();
-    }
+    await this.authRepository.insertToken(accessToken, refreshToken, tokenID, user.id);
+    // Delete certification
+    await this.authRepository.deleteCertification(code);
 
-    // User -> update token
+    return { accessToken, refreshToken, nickname, email };
+  };
+
+  public signin = async (code: string, email: string) => {
+    // Get user
+    const user = await this.userRepository.getUser(email);
+    // Update token
+    const tokenID = util.uuid();
+    const { accessToken, refreshToken } = util.token.getAuthTokenSet(
+      { userID: user.id, tokenID },
+      config.serverConfig.baseURL
+    );
+    await this.authRepository.updateToken(accessToken, refreshToken, user.id);
+    // Delete certification
+
+    await this.authRepository.deleteCertification(code);
+
+    return { accessToken, refreshToken, nickname: user.nickname, email };
   };
 }

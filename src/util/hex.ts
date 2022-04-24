@@ -1,4 +1,4 @@
-export const generateHexString = (length: number): string => {
+const generateHexString = (length: number): string => {
   const hex = '01234567890abcdef';
   let output = '';
   for (let i = 0; i < length; i++) {
@@ -6,3 +6,5 @@ export const generateHexString = (length: number): string => {
   }
   return output;
 };
+
+export default generateHexString;

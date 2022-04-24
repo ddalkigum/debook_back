@@ -1,5 +1,7 @@
 import * as uuid from 'uuid';
 
-export const generageUUID = () => {
+const generageUUID = () => {
   return uuid.v4();
 };
+
+export default generageUUID;
