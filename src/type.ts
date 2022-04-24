@@ -11,4 +11,9 @@ export const TYPES = {
   AuthRouter: Symbol.for('AuthRouter'),
   AuthService: Symbol.for('AuthService'),
   AuthRepository: Symbol.for('AuthRepository'),
+
+  // User
+  UserRouter: Symbol.for('UserRouter'),
+  UserService: Symbol.for('UserService'),
+  UserRepository: Symbol.for('UserRepository'),
 };

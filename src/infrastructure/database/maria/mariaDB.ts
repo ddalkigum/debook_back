@@ -1,5 +1,5 @@
 import { inject, injectable } from 'inversify';
-import { DataSource, EntityTarget } from 'typeorm';
+import { DataSource, EntityTarget, ObjectLiteral } from 'typeorm';
 import { Constants } from '../../../constants';
 import { TYPES } from '../../../type';
 import { IWinstonLogger } from '../../logger/interface';
@@ -9,6 +9,12 @@ import { dataSource } from './ormConfig';
 
 const getEntity = <T>(tableName: Constants): EntityTarget<T> => {
   switch (tableName) {
+    case Constants.TOKEN_TABLE:
+      return Entity.Token;
+
+    case Constants.CERTIFICATION_TABLE:
+      return Entity.Certification;
+
     case Constants.USER_TABLE:
       return Entity.User;
   }
@@ -71,6 +77,21 @@ export default class MariaDB implements IMariaDB {
         .where({ id })
         .getOne();
       return result as T;
+    } finally {
+      await queryRunner.release();
+    }
+  };
+
+  public findByColumn = async <T>(tableName: Constants, rows: Partial<T>) => {
+    const queryRunner = this.connection.createQueryRunner();
+    try {
+      const EntityClass = getEntity<T>(tableName);
+      const result = await this.connection
+        .createQueryBuilder<T>(EntityClass, tableName)
+        .setQueryRunner(queryRunner)
+        .where(rows)
+        .getOne();
+      return result;
     } finally {
       await queryRunner.release();
     }

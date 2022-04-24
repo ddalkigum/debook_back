@@ -12,6 +12,8 @@ import { IAuthRepository, IAuthService } from './domain/auth/interface';
 import { IHttpRouter } from './domain/interface';
 import * as Logger from './infrastructure/logger';
 import * as Auth from './domain/auth';
+import * as User from './domain/user';
+import { IUserRepository, IUserService } from './domain/user/interface';
 
 export const container = new Container({ defaultScope: 'Singleton' });
 
@@ -26,3 +28,7 @@ container.bind<IRedisDB>(TYPES.RedisDB).to(RedisDB);
 container.bind<IAuthRepository>(TYPES.AuthRepository).to(Auth.Repository);
 container.bind<IAuthService>(TYPES.AuthService).to(Auth.Service);
 container.bind<IHttpRouter>(TYPES.AuthRouter).to(Auth.Router);
+
+container.bind<IUserRepository>(TYPES.UserRepository).to(User.Repository);
+container.bind<IUserService>(TYPES.UserService).to(User.Service);
+container.bind<IHttpRouter>(TYPES.UserRouter).to(User.Router);

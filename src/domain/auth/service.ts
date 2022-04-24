@@ -4,11 +4,13 @@ import { TYPES } from '../../type';
 import { IAuthRepository, IAuthService } from './interface';
 import * as util from '../../util';
 import * as config from '../../config';
+import { IUserRepository } from '../user/interface';
 
 @injectable()
 export default class AuthService implements IAuthService {
   @inject(TYPES.WinstonLogger) private logger: IWinstonLogger;
   @inject(TYPES.AuthRepository) private authRepository: IAuthRepository;
+  @inject(TYPES.UserRepository) private userRepository: IUserRepository;
 
   public setCertification = async (code: string, email: string) => {
     this.logger.debug(`AuthService, setAuthCode`);
@@ -43,7 +45,7 @@ export default class AuthService implements IAuthService {
 
   public signin = async (code: string, email: string) => {
     // Get user
-    const user = await this.userRepository.getUser(email);
+    const user = await this.userRepository.getUserByEmail(email);
     // Update token
     const tokenID = util.uuid.generageUUID();
     const { accessToken, refreshToken } = util.token.getAuthTokenSet(
