@@ -1,5 +1,6 @@
 import { inject, injectable } from 'inversify';
 import { DataSource, EntityTarget, ObjectLiteral } from 'typeorm';
+import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 import { Constants } from '../../../constants';
 import { TYPES } from '../../../type';
 import { IWinstonLogger } from '../../logger/interface';
@@ -50,24 +51,25 @@ export default class MariaDB implements IMariaDB {
     }
   };
 
-  public insert = async <T extends IEntity>(tableName: Constants, row: T): Promise<T> => {
+  public insert = async <T>(tableName: Constants, rows: Partial<T>): Promise<Partial<T> & IEntity> => {
     const queryRunner = this.connection.createQueryRunner();
     try {
-      const EntityClass = getEntity(tableName);
-      await this.connection
-        .createQueryBuilder(EntityClass, tableName)
+      const EntityClass = getEntity<T>(tableName);
+      const result = await this.connection
+        .createQueryBuilder<T>(EntityClass, tableName)
         .setQueryRunner(queryRunner)
         .insert()
         .into(EntityClass)
-        .values(row)
+        .values((rows as unknown) as QueryDeepPartialEntity<T>)
         .execute();
-      return row;
+
+      return { id: result.identifiers[0].id, ...rows };
     } finally {
       await queryRunner.release();
     }
   };
 
-  public findbyID = async <T extends IEntity>(tableName: Constants, id: string | number): Promise<T> => {
+  public findbyID = async <T>(tableName: Constants, id: string | number): Promise<T> => {
     const queryRunner = this.connection.createQueryRunner();
     try {
       const EntityClass = getEntity(tableName);
@@ -92,6 +94,21 @@ export default class MariaDB implements IMariaDB {
         .where(rows)
         .getOne();
       return result;
+    } finally {
+      await queryRunner.release();
+    }
+  };
+
+  public deleteByColumn = async <T>(tableName: Constants, row: Partial<T>) => {
+    const queryRunner = this.connection.createQueryRunner();
+    try {
+      const EntityClass = getEntity<T>(tableName);
+      await this.connection
+        .createQueryBuilder<T>(EntityClass, tableName)
+        .setQueryRunner(queryRunner)
+        .delete()
+        .where(row)
+        .execute();
     } finally {
       await queryRunner.release();
     }

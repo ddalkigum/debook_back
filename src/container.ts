@@ -8,10 +8,8 @@ import { IMariaDB } from './infrastructure/database/maria/interface';
 import MariaDB from './infrastructure/database/maria/mariaDB';
 import { IRedisDB } from './infrastructure/database/redis/interface';
 import RedisDB from './infrastructure/database/redis/redisDB';
-import { IAuthRepository, IAuthService } from './domain/auth/interface';
 import { IHttpRouter } from './domain/interface';
 import * as Logger from './infrastructure/logger';
-import * as Auth from './domain/auth';
 import * as User from './domain/user';
 import { IUserRepository, IUserService } from './domain/user/interface';
 
@@ -25,10 +23,7 @@ container.bind<IMariaDB>(TYPES.MariaDB).to(MariaDB);
 container.bind<IRedisDB>(TYPES.RedisDB).to(RedisDB);
 
 // Domain
-container.bind<IAuthRepository>(TYPES.AuthRepository).to(Auth.Repository);
-container.bind<IAuthService>(TYPES.AuthService).to(Auth.Service);
-container.bind<IHttpRouter>(TYPES.AuthRouter).to(Auth.Router);
-
+// User
 container.bind<IUserRepository>(TYPES.UserRepository).to(User.Repository);
 container.bind<IUserService>(TYPES.UserService).to(User.Service);
 container.bind<IHttpRouter>(TYPES.UserRouter).to(User.Router);

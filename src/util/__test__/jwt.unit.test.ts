@@ -1,4 +1,4 @@
-import * as util from '../';
+import * as Util from '../';
 import { container } from '../../container';
 import { IWinstonLogger } from '../../infrastructure/logger/interface';
 import { TYPES } from '../../type';
@@ -11,7 +11,7 @@ describe('Access token test', () => {
   };
   const issuer = 'goback';
   test('Should return access token', () => {
-    const accessToken = util.generateAccessToken(payload, issuer);
+    const accessToken = Util.token.generateAccessToken(payload, issuer);
     logger.debug(accessToken);
     expect(accessToken.startsWith('ey')).toBeTruthy();
   });
@@ -20,12 +20,12 @@ describe('Access token test', () => {
 describe('Refresh token test', () => {
   const payload = {
     userID: 1,
-    tokenID: util.generageUUID(),
+    tokenID: Util.uuid.generageUUID(),
   };
   const issuer = 'goback';
 
   test('Should return refresh token', () => {
-    const refreshToken = util.generateRefreshToken(payload, issuer);
+    const refreshToken = Util.token.generateRefreshToken(payload, issuer);
     logger.debug(refreshToken);
     expect(refreshToken.startsWith('ey')).toBeTruthy();
   });
