@@ -16,13 +16,18 @@ export default class UserRepository implements IUserRepository {
     return await this.mariaDB.insert<UserEntity>(Constants.USER_TABLE, { email, nickname });
   };
 
-  public getUserByEmail = async (email: string) => {
-    this.logger.debug(`UserRepository, getUserByEmail, email: ${email}`);
-    return await this.mariaDB.findByColumn<UserEntity>(Constants.USER_TABLE, { email });
+  public getUserByID = async (userID: number) => {
+    this.logger.debug(`UserRepository, getUserByID, userID: ${userID}`);
+    return await this.mariaDB.findbyID<UserEntity>(Constants.USER_TABLE, userID);
   };
 
   public getUserByNickname = async (nickname: string) => {
     this.logger.debug(`UserRepository, getUserByNickname, nickname: ${nickname}`);
     return await this.mariaDB.findByColumn<UserEntity>(Constants.USER_TABLE, { nickname });
+  };
+
+  public deleteUser = async (userID: number) => {
+    this.logger.debug(`UserRepository, deleteUser, userID: ${userID}`);
+    return await this.mariaDB.deleteByColumn<UserEntity>(Constants.USER_TABLE, { id: userID });
   };
 }
