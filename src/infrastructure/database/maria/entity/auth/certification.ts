@@ -9,6 +9,9 @@ export default class CertificationEntity {
   @Column({ type: 'varchar', length: 100 })
   email: string;
 
-  @Column({ type: 'varchar', length: '6' })
-  status: string;
+  @Column({ type: 'varchar', length: 10 })
+  code: string;
+
+  @Column({ type: 'tinyint' })
+  isSignup: boolean;
 }

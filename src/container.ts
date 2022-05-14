@@ -9,9 +9,15 @@ import MariaDB from './infrastructure/database/maria/mariaDB';
 import { IRedisDB } from './infrastructure/database/redis/interface';
 import RedisDB from './infrastructure/database/redis/redisDB';
 import { IHttpRouter } from './domain/interface';
-import * as Logger from './infrastructure/logger';
-import * as User from './domain/user';
 import { IUserRepository, IUserService } from './domain/user/interface';
+import { IApiResponse } from './common/interface';
+import * as Logger from './infrastructure/logger';
+import * as Auth from './domain/auth';
+import * as User from './domain/user';
+import * as Common from './common';
+import { IAuthRepository, IAuthService } from './domain/auth/interface';
+import SES from './infrastructure/aws/ses/ses';
+import { ISES } from './infrastructure/aws/ses/interface';
 
 export const container = new Container({ defaultScope: 'Singleton' });
 
@@ -20,10 +26,18 @@ container.bind<IServer>(TYPES.Server).to(ExpressServer);
 container.bind<IWinstonLogger>(TYPES.WinstonLogger).to(Logger.Winston);
 container.bind<IMorganLogger>(TYPES.MorganLogger).to(Logger.Morgan);
 container.bind<IMariaDB>(TYPES.MariaDB).to(MariaDB);
-container.bind<IRedisDB>(TYPES.RedisDB).to(RedisDB);
+container.bind<ISES>(TYPES.SES).to(SES);
+
+// Common
+container.bind<IApiResponse>(TYPES.ApiResponse).to(Common.ApiResponse);
 
 // Domain
+// Auth
+container.bind<IHttpRouter>(TYPES.AuthRouter).to(Auth.Router);
+container.bind<IAuthService>(TYPES.AuthService).to(Auth.Service);
+container.bind<IAuthRepository>(TYPES.AuthRepository).to(Auth.Repository);
+
 // User
-container.bind<IUserRepository>(TYPES.UserRepository).to(User.Repository);
-container.bind<IUserService>(TYPES.UserService).to(User.Service);
 container.bind<IHttpRouter>(TYPES.UserRouter).to(User.Router);
+container.bind<IUserService>(TYPES.UserService).to(User.Service);
+container.bind<IUserRepository>(TYPES.UserRepository).to(User.Repository);

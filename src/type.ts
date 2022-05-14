@@ -4,7 +4,10 @@ export const TYPES = {
   WinstonLogger: Symbol.for('WinstonLogger'),
   MorganLogger: Symbol.for('MorganLogger'),
   MariaDB: Symbol.for('MariaDB'),
-  RedisDB: Symbol.for('RedisDB'),
+  SES: Symbol.for('SES'),
+
+  // Common
+  ApiResponse: Symbol.for('ApiResponse'),
 
   // Domain
   // Auth

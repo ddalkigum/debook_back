@@ -6,9 +6,15 @@ export default class TokenEntity {
   @PrimaryColumn({ type: 'varchar', length: 36 })
   id: string;
 
+  @Column({ type: 'int' })
+  userID: number;
+
   @Column({ type: 'varchar', length: 250 })
   accessToken: string;
 
   @Column({ type: 'varchar', length: 350 })
   refreshToken: string;
+
+  @Column({ type: 'datetime' })
+  deleteTime: string;
 }
