@@ -12,9 +12,9 @@ export default class AuthRepository implements IAuthRepository {
   @inject(TYPES.WinstonLogger) private logger: IWinstonLogger;
   @inject(TYPES.MariaDB) private mariaDB: IMariaDB;
 
-  public insertCertification = async (code: string, email: string) => {
-    this.logger.debug(`AuthRepository, insertCertification, code: ${code}, email: ${email}`);
-    return await this.mariaDB.insert<CertificationEntity>(Constants.CERTIFICATION_TABLE, { code, email });
+  public insertCertification = async (code: string, email: string, isSignup: boolean) => {
+    this.logger.debug(`AuthRepository, insertCertification, code: ${code}, email: ${email}, isSignup: ${isSignup}`);
+    return await this.mariaDB.insert<CertificationEntity>(Constants.CERTIFICATION_TABLE, { code, email, isSignup });
   };
   public getCertificationByCode = async (code: string) => {
     this.logger.debug(`AuthRepository, getCertificationByCode, code: ${code}`);
@@ -33,10 +33,17 @@ export default class AuthRepository implements IAuthRepository {
       { accessToken, refreshToken }
     );
   };
-  public insertToken = async (userID: number, tokenSet: TokenSet) => {
-    this.logger.debug(`AuthRepository, insertToken, userID: ${userID}, tokenSet: ${JSON.stringify(tokenSet)}`);
+  public insertToken = async (userID: number, tokenID: string, tokenSet: TokenSet) => {
+    this.logger.debug(
+      `AuthRepository, insertToken, userID: ${userID}, tokenID: ${tokenID}, tokenSet: ${JSON.stringify(tokenSet)}`
+    );
     const { accessToken, refreshToken } = tokenSet;
-    return await this.mariaDB.insert<TokenEntity>(Constants.TOKEN_TABLE, { userID, accessToken, refreshToken });
+    return await this.mariaDB.insert<TokenEntity>(Constants.TOKEN_TABLE, {
+      id: tokenID,
+      userID,
+      accessToken,
+      refreshToken,
+    });
   };
   public getTokenByAccessToken = async (accessToken: string) => {
     this.logger.debug(`AuthRepository, getTokenByAccessToken, accessToken: ${accessToken}`);

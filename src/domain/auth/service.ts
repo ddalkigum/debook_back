@@ -29,7 +29,7 @@ export default class AuthService implements IAuthService {
 
     const tokenID = util.uuid.generageUUID();
     const tokenSet = util.token.getAuthTokenSet({ userID: foundUser.id, tokenID }, config.authConfig.issuer);
-    await this.authRepository.insertToken(foundUser.id, tokenSet);
+    await this.authRepository.insertToken(foundUser.id, tokenID, tokenSet);
 
     await this.authRepository.deleteCertificationByCode(code);
 
@@ -61,7 +61,7 @@ export default class AuthService implements IAuthService {
     // FIXME: 메일 보내는 구조 별로임 구조 수정 필요함
     const baseURL = `http://localhost:3000/v1/auth/${foundUser ? 'signin' : 'signup'}`;
 
-    await this.authRepository.insertCertification(email, code);
+    await this.authRepository.insertCertification(email, code, isSignup);
 
     this.sesClient.sendAuthEmail(email, code, isSignup, baseURL);
   };

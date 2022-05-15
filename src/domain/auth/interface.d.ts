@@ -1,4 +1,5 @@
 import CertificationEntity from '../../infrastructure/database/maria/entity/auth/certification';
+import TokenEntity from '../../infrastructure/database/maria/entity/auth/token';
 
 export interface TokenSet {
   accessToken: string;
@@ -17,10 +18,10 @@ export interface IAuthService {
 }
 
 export interface IAuthRepository {
-  insertCertification: (code: string, email: string) => Promise<Partial<CertificationEntity>>;
+  insertCertification: (code: string, email: string, isSignup: boolean) => Promise<Partial<CertificationEntity>>;
   getCertificationByCode: (code: string) => Promise<CertificationEntity>;
   deleteCertificationByCode: (code: string) => Promise<void>;
   updateToken: (userID: number, tokenSet: TokenSet) => Promise<Partial<TokenEntity>>;
-  insertToken: (userID: number, tokenSet: TokenSet) => Promise<Partial<TokenEntity>>;
+  insertToken: (userID: number, tokenID: string, tokenSet: TokenSet) => Promise<Partial<TokenEntity>>;
   getTokenByAccessToken: (accesstoken: string) => Promise<TokenEntity>;
 }

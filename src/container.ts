@@ -6,8 +6,6 @@ import { IServer } from './infrastructure/express/interface';
 import { IMorganLogger, IWinstonLogger } from './infrastructure/logger/interface';
 import { IMariaDB } from './infrastructure/database/maria/interface';
 import MariaDB from './infrastructure/database/maria/mariaDB';
-import { IRedisDB } from './infrastructure/database/redis/interface';
-import RedisDB from './infrastructure/database/redis/redisDB';
 import { IHttpRouter } from './domain/interface';
 import { IUserRepository, IUserService } from './domain/user/interface';
 import { IApiResponse } from './common/interface';
