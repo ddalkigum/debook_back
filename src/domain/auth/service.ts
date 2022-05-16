@@ -61,7 +61,9 @@ export default class AuthService implements IAuthService {
     // FIXME: 메일 보내는 구조 별로임 구조 수정 필요함
     const baseURL = `http://localhost:3000/v1/auth/${foundUser ? 'signin' : 'signup'}`;
 
-    await this.authRepository.insertCertification(email, code, isSignup);
+    const certificationID = util.uuid.generageUUID();
+    const deleteTime = util.date.setDateTime(60 * 60);
+    await this.authRepository.insertCertification(certificationID, email, code, isSignup, deleteTime);
 
     this.sesClient.sendAuthEmail(email, code, isSignup, baseURL);
   };

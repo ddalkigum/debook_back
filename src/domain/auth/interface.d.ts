@@ -18,7 +18,13 @@ export interface IAuthService {
 }
 
 export interface IAuthRepository {
-  insertCertification: (code: string, email: string, isSignup: boolean) => Promise<Partial<CertificationEntity>>;
+  insertCertification: (
+    certificationID: string,
+    code: string,
+    email: string,
+    isSignup: boolean,
+    deleteTime: string
+  ) => Promise<Partial<CertificationEntity>>;
   getCertificationByCode: (code: string) => Promise<CertificationEntity>;
   deleteCertificationByCode: (code: string) => Promise<void>;
   updateToken: (userID: number, tokenSet: TokenSet) => Promise<Partial<TokenEntity>>;

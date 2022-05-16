@@ -1,8 +1,10 @@
 import { SendEmailCommand, SESClient } from '@aws-sdk/client-ses';
+import { injectable } from 'inversify';
 import * as config from '../../../config';
 import { ISES } from './interface';
 import { getAuthEmailTemplate } from './template/auth';
 
+@injectable()
 export default class SES implements ISES {
   private client: SESClient = new SESClient({
     region: config.awsConfig.region,

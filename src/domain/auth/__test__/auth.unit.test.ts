@@ -23,9 +23,11 @@ afterAll(async () => {
 });
 
 const testSignupCertification = {
+  id: util.uuid.generageUUID(),
   code: util.hex.generateHexString(10),
   email: 'signup@user.com',
   isSignup: true,
+  deleteTime: util.date.setDateTime(60 * 60),
 };
 
 const testSigninCertification = {
@@ -37,8 +39,8 @@ const testSigninCertification = {
 describe('Certification test', () => {
   // insert certification test
   test('InsertCertification, Should return certification', async () => {
-    const { code, email, isSignup } = testSignupCertification;
-    const certification = await authRepository.insertCertification(code, email, isSignup);
+    const { id, code, email, isSignup, deleteTime } = testSignupCertification;
+    const certification = await authRepository.insertCertification(id, code, email, isSignup, deleteTime);
 
     expect(certification.code).toEqual(testSignupCertification.code);
     expect(certification.email).toEqual(testSignupCertification.email);
@@ -101,5 +103,10 @@ describe('Token test', () => {
   test('UpdateToken, Should return updated token', async () => {
     const newTokenSet = util.token.getAuthTokenSet({ userID, tokenID }, 'testIssuer');
     const updatedToken = await authRepository.updateToken(userID, newTokenSet);
+    const foundToken = await authRepository.getTokenByAccessToken(updatedToken.accessToken);
+
+    expect(foundToken.accessToken).toEqual(newTokenSet.accessToken);
+    expect(foundToken.refreshToken).toEqual(newTokenSet.refreshToken);
+    expect(foundToken.userID).toEqual(userID);
   });
 });
