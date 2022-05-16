@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 import * as config from '../config';
-import TokenEntity from '../infrastructure/database/maria/entity/auth/token';
+import { TokenSet } from '../domain/auth/interface';
 
 interface AccessTokenPayload {
   userID: number;
@@ -9,11 +9,6 @@ interface AccessTokenPayload {
 interface TokenSetPayload {
   userID: number;
   tokenID: string;
-}
-
-interface ITokenSet {
-  accessToken: string;
-  refreshToken: string;
 }
 
 const generateAccessToken = (payload: AccessTokenPayload, issuer: string) => {
@@ -32,7 +27,7 @@ const generateRefreshToken = (payload: TokenSetPayload, issuer: string) => {
   });
 };
 
-const getAuthTokenSet = (payload: TokenSetPayload, issuer: string): Omit<TokenEntity, 'id'> => {
+const getAuthTokenSet = (payload: TokenSetPayload, issuer: string): TokenSet => {
   const accessToken = jwt.sign({ user_id: payload.userID }, config.authConfig.jwtSignKey, {
     expiresIn: '2h',
     issuer,

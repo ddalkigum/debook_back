@@ -113,4 +113,21 @@ export default class MariaDB implements IMariaDB {
       await queryRunner.release();
     }
   };
+
+  public updateByColumn = async <T>(tableName: Constants, whereCondition: Partial<T>, rows: Partial<T>) => {
+    const queryRunner = this.connection.createQueryRunner();
+    try {
+      const EntityClass = getEntity<T>(tableName);
+      await this.connection
+        .createQueryBuilder<T>(EntityClass, tableName)
+        .setQueryRunner(queryRunner)
+        .update()
+        .set((rows as unknown) as QueryDeepPartialEntity<T>)
+        .where(whereCondition)
+        .execute();
+      return rows;
+    } finally {
+      await queryRunner.release();
+    }
+  };
 }

@@ -5,11 +5,13 @@ import { inject, injectable } from 'inversify';
 import { IServer } from './interface';
 import { TYPES } from '../../type';
 import { IMorganLogger, IWinstonLogger } from '../logger/interface';
+import { IHttpRouter } from '../../domain/interface';
 
 @injectable()
 export class ExpressServer implements IServer {
   @inject(TYPES.WinstonLogger) private logger: IWinstonLogger;
   @inject(TYPES.MorganLogger) private morganLogger: IMorganLogger;
+  @inject(TYPES.AuthRouter) private authRouter: IHttpRouter;
 
   private app: express.Application = express();
 
@@ -23,6 +25,12 @@ export class ExpressServer implements IServer {
     this.app.use(express.json());
     this.app.use(express.urlencoded({ extended: false }));
     this.app.use(this.morganLogger.init());
+
+    this.authRouter.init();
+
+    this.app.use('/v1/auth', this.authRouter.get());
+
+    // TODO: Error handler
   };
 
   public start = (port: string) => {

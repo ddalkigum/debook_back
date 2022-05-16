@@ -1,10 +1,16 @@
 import { SendEmailCommandInput } from '@aws-sdk/client-ses';
+import * as config from '../../../../config';
 
-export const getAuthenticateEmailTemplate = (
-  adminEmail: string,
+export const getAuthEmailTemplate = (
   userEmail: string,
-  redirecURL: string
+  code: string,
+  baseURL: string,
+  isSignup: boolean
 ): SendEmailCommandInput => {
+  const buttonText = isSignup ? '회원가입하기' : '로그인하기';
+  const redirectURL = `${baseURL}?code=${code}`;
+  const emailTitle = isSignup ? '회원가입' : '로그인';
+
   return {
     Destination: { ToAddresses: [userEmail] },
     Message: {
@@ -22,7 +28,7 @@ export const getAuthenticateEmailTemplate = (
               <span style="color: gray"><strong>안녕하세요!</strong> 혹시 본인이 보낸 요청이 아니라면,</br> 이 메일을 무시해주세요</span>
             </div>
         
-            <a href="${redirecURL}" style="
+            <a href="${redirectURL}" style="
               display: block;
               width: 600px;
               text-align: center;
@@ -35,10 +41,10 @@ export const getAuthenticateEmailTemplate = (
               border-radius: 12px;
               margin-top: 20px;
               text-decoration: none;
-            ">로그인하기</a>
+            ">${buttonText}</a>
       
             <div style="margin-top: 20px; text-align: center;">
-              <p style="margin-top: 20px;">위 버튼이 눌리지 않으면 <a href="${redirecURL}">여기</a>를 클릭해주세요 </p>
+              <p style="margin-top: 20px;">위 버튼이 눌리지 않으면 <a href="${redirectURL}">여기</a>를 클릭해주세요 </p>
               <p>이 링크는 한시간동안 유효합니다</p>
             </div>
           </div>`,
@@ -46,9 +52,9 @@ export const getAuthenticateEmailTemplate = (
       },
       Subject: {
         Charset: 'UTF-8',
-        Data: '고백 로그인',
+        Data: `땡땡 ${emailTitle}`,
       },
     },
-    Source: adminEmail,
+    Source: config.awsConfig.adminEmail,
   };
 };
