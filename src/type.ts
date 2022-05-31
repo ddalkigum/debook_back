@@ -8,12 +8,18 @@ export const TYPES = {
 
   // Common
   ApiResponse: Symbol.for('ApiResponse'),
+  Middleware: Symbol.for('Middleware'),
 
   // Domain
   // Auth
   AuthRouter: Symbol.for('AuthRouter'),
   AuthService: Symbol.for('AuthService'),
   AuthRepository: Symbol.for('AuthRepository'),
+
+  // Party
+  PartyRouter: Symbol.for('PartyRouter'),
+  PartyService: Symbol.for('PartyService'),
+  Partyrepository: Symbol.for('Partyrepository'),
 
   // User
   UserRouter: Symbol.for('UserRouter'),

@@ -9,13 +9,17 @@ import MariaDB from './infrastructure/database/maria/mariaDB';
 import { IHttpRouter } from './domain/interface';
 import { IUserRepository, IUserService } from './domain/user/interface';
 import { IApiResponse } from './common/interface';
+import { IAuthRepository, IAuthService } from './domain/auth/interface';
+import { ISES } from './infrastructure/aws/ses/interface';
+import { IPartyRepository, IPartyService } from './domain/party/interface';
+import { IMiddleware } from './middleware/interface';
 import * as Logger from './infrastructure/logger';
 import * as Auth from './domain/auth';
+import * as Party from './domain/party';
 import * as User from './domain/user';
 import * as Common from './common';
-import { IAuthRepository, IAuthService } from './domain/auth/interface';
+import * as Middleware from './middleware/middleware';
 import SES from './infrastructure/aws/ses/ses';
-import { ISES } from './infrastructure/aws/ses/interface';
 
 export const container = new Container({ defaultScope: 'Singleton' });
 
@@ -28,12 +32,18 @@ container.bind<ISES>(TYPES.SES).to(SES);
 
 // Common
 container.bind<IApiResponse>(TYPES.ApiResponse).to(Common.ApiResponse);
+container.bind<IMiddleware>(TYPES.Middleware).to(Middleware.default);
 
 // Domain
 // Auth
 container.bind<IHttpRouter>(TYPES.AuthRouter).to(Auth.Router);
 container.bind<IAuthService>(TYPES.AuthService).to(Auth.Service);
 container.bind<IAuthRepository>(TYPES.AuthRepository).to(Auth.Repository);
+
+// Party
+container.bind<IHttpRouter>(TYPES.PartyRouter).to(Party.Router);
+container.bind<IPartyService>(TYPES.PartyService).to(Party.Service);
+container.bind<IPartyRepository>(TYPES.Partyrepository).to(Party.Repository);
 
 // User
 container.bind<IHttpRouter>(TYPES.UserRouter).to(User.Router);

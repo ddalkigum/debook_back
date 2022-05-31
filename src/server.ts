@@ -5,12 +5,11 @@ import { IMariaDB } from './infrastructure/database/maria/interface';
 import { IServer } from './infrastructure/express/interface';
 import { TYPES } from './type';
 
+const server: IServer = container.get(TYPES.Server);
+const mariaDB: IMariaDB = container.get(TYPES.MariaDB);
+
 const start = async () => {
-  const server: IServer = container.get(TYPES.Server);
-  const mariaDB: IMariaDB = container.get(TYPES.MariaDB);
-
   console.log('config: ', config);
-
   await mariaDB.init();
 
   server.set();
@@ -18,3 +17,5 @@ const start = async () => {
 };
 
 start();
+
+process.once('SIGTERM', server.exit).once('SIGINT', server.exit);

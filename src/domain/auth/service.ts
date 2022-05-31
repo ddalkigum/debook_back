@@ -6,6 +6,7 @@ import { IAuthRepository, IAuthService } from './interface';
 import * as util from '../../util';
 import * as config from '../../config';
 import { ISES } from '../../infrastructure/aws/ses/interface';
+import ErrorGenerator from '../../common/error';
 
 @injectable()
 export default class AuthService implements IAuthService {
@@ -18,22 +19,21 @@ export default class AuthService implements IAuthService {
     this.logger.debug(`AuthService, emailSignup, code: ${code}, email: ${email}, nickname: ${nickname}`);
     const certification = await this.authRepository.getCertificationByCode(code);
 
-    if (!certification) throw new Error('AccessDenied');
-    if (!certification.isSignup) throw new Error('NotSignupCertification');
+    if (!certification) throw ErrorGenerator.badRequest('Does not exist certification');
+    if (!certification.isSignup) throw ErrorGenerator.badRequest('AlreadyExistUser');
 
     const foundUser = await this.userRepository.getUserByNickname(nickname);
+    if (foundUser) throw ErrorGenerator.badRequest('AlreadyExistUser');
 
-    if (foundUser) throw new Error('AlreadyExist');
-
-    await this.userRepository.insertUser(email, nickname);
+    const signupUser = await this.userRepository.insertUser(email, nickname);
 
     const tokenID = util.uuid.generageUUID();
-    const tokenSet = util.token.getAuthTokenSet({ userID: foundUser.id, tokenID }, config.authConfig.issuer);
-    await this.authRepository.insertToken(foundUser.id, tokenID, tokenSet);
+    const tokenSet = util.token.getAuthTokenSet({ userID: signupUser.id, tokenID }, config.authConfig.issuer);
+    await this.authRepository.insertToken(signupUser.id, tokenID, tokenSet);
 
     await this.authRepository.deleteCertificationByCode(code);
 
-    return tokenSet;
+    return { tokenSet, user: signupUser };
   };
 
   public emailSignin = async (code: string) => {
@@ -55,22 +55,30 @@ export default class AuthService implements IAuthService {
 
   public sendEmail = async (email: string) => {
     this.logger.debug(`AuthService, sendEmail, email: ${email}`);
+    // const foundCertification = await this.authRepository.getCertificationByEmail(email);
+
     const code = util.hex.generateHexString(10);
     const foundUser = await this.userRepository.getUserByEmail(email);
     let isSignup = foundUser ? false : true;
     // FIXME: 메일 보내는 구조 별로임 구조 수정 필요함
-    const baseURL = `http://localhost:3000/v1/auth/${foundUser ? 'signin' : 'signup'}`;
+    const baseURL = `${config.clientConfig.baseURL}/${foundUser ? 'signin' : 'signup'}`;
 
     const certificationID = util.uuid.generageUUID();
     const deleteTime = util.date.setDateTime(60 * 60);
+
     await this.authRepository.insertCertification(certificationID, email, code, isSignup, deleteTime);
 
     this.sesClient.sendAuthEmail(email, code, isSignup, baseURL);
+    return 'Success';
   };
 
   public checkSignupRequest = async (code: string) => {
     this.logger.debug(`AuthService, checkSignupRequest, code: ${code}`);
     const certification = await this.authRepository.getCertificationByCode(code);
-    return { isSignup: certification.isSignup };
+
+    if (!certification) throw ErrorGenerator.unAuthorized('DoesNotExistCertification');
+
+    const { isSignup, email } = certification;
+    return { isSignup, email };
   };
 }

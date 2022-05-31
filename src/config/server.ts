@@ -1,4 +1,4 @@
-const DEFAULT_PORT = '3000';
+const DEFAULT_PORT = '3001';
 
 const serverConfig = {
   port: process.env.PORT || DEFAULT_PORT,

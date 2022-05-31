@@ -1,5 +1,6 @@
 import CertificationEntity from '../../infrastructure/database/maria/entity/auth/certification';
 import TokenEntity from '../../infrastructure/database/maria/entity/auth/token';
+import UserEntity from '../../infrastructure/database/maria/entity/user/user';
 
 export interface TokenSet {
   accessToken: string;
@@ -10,10 +11,15 @@ export interface CheckSignup {
   isSignup: boolean;
 }
 
+export interface SignupResult {
+  tokenSet: TokenSet;
+  user: UserEntity;
+}
+
 export interface IAuthService {
-  emailSignup: (code: string, email: string, nickname: string) => Promise<TokenSet>;
+  emailSignup: (code: string, email: string, nickname: string) => Promise<SignupResult>;
   emailSignin: (code: string) => Promise<TokenSet>;
-  sendEmail: (email: string) => Promise<void>;
+  sendEmail: (email: string) => Promise<string>;
   checkSignupRequest: (code: string) => Promise<CheckSignup>;
 }
 
@@ -25,6 +31,7 @@ export interface IAuthRepository {
     isSignup: boolean,
     deleteTime: string
   ) => Promise<Partial<CertificationEntity>>;
+  getCertificationByEmail: (email: string) => Promise<CertificationEntity>;
   getCertificationByCode: (code: string) => Promise<CertificationEntity>;
   deleteCertificationByCode: (code: string) => Promise<void>;
   updateToken: (userID: number, tokenSet: TokenSet) => Promise<Partial<TokenEntity>>;
