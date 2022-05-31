@@ -29,8 +29,9 @@ if (!envFound || envFound.error) {
   throw new Error(`Couldn.t find ${envPath} file`);
 }
 
-export { default as serverConfig } from './server';
-export { default as dbConfig } from './mariaDB';
 export { default as authConfig } from './auth';
-export { default as redisConfig } from './redisDB';
 export { default as awsConfig } from './aws';
+export { default as clientConfig } from './client';
+export { default as dbConfig } from './mariaDB';
+export { default as redisConfig } from './redisDB';
+export { default as serverConfig } from './server';

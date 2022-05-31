@@ -1,8 +1,8 @@
 import { Column, Entity, Index, PrimaryColumn } from 'typeorm';
 import { Constants } from '../../../../../constants';
 
-@Entity({ name: Constants.TOKEN_TABLE })
-export default class TokenEntity {
+@Entity({ name: Constants.PARTY_TABLE })
+export default class PartyEntity {
   @PrimaryColumn({ type: 'varchar', length: 36 })
   id: string;
 

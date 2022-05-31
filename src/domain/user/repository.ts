@@ -13,7 +13,11 @@ export default class UserRepository implements IUserRepository {
 
   public insertUser = async (email: string, nickname: string) => {
     this.logger.debug(`UserRepository, insertUser, email: ${email}, nickname: ${nickname}`);
-    return await this.mariaDB.insert<UserEntity>(Constants.USER_TABLE, { email, nickname });
+    return await this.mariaDB.insert<UserEntity>(Constants.USER_TABLE, {
+      email,
+      nickname,
+      profileImage: 'https://velog.velcdn.com/images/ddalkigum/profile/cf4d440d-6dbf-4306-8ab7-2fe5073f8459/social.png',
+    });
   };
 
   public getUserByID = async (userID: number) => {

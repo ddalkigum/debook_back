@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response, Router } from 'express';
 import { inject, injectable } from 'inversify';
 import { IApiResponse } from '../../common/interface';
+import { IMiddleware } from '../../middleware/interface';
 import { TYPES } from '../../type';
 import { checkRequired } from '../../util';
 import { IHttpRouter } from '../interface';
@@ -9,6 +10,7 @@ import { IAuthService } from './interface';
 @injectable()
 export default class AuthRouter implements IHttpRouter {
   @inject(TYPES.ApiResponse) private apiResponse: IApiResponse;
+  @inject(TYPES.Middleware) private middleware: IMiddleware;
   @inject(TYPES.AuthService) private authService: IAuthService;
 
   private router = Router();
@@ -36,6 +38,16 @@ export default class AuthRouter implements IHttpRouter {
       });
     });
 
+    this.router.get(
+      '/check/login',
+      this.middleware.authorization,
+      async (request: Request, response: Response, next: NextFunction) => {
+        this.apiResponse.generateResponse(request, response, next, async () => {
+          return 'Success';
+        });
+      }
+    );
+
     // GET /v1/auth/check?code=?
     this.router.get('/check', async (request: Request, response: Response, next: NextFunction) => {
       this.apiResponse.generateResponse(request, response, next, async () => {
@@ -49,11 +61,14 @@ export default class AuthRouter implements IHttpRouter {
       this.apiResponse.generateResponse(request, response, next, async () => {
         const { code, email, nickname } = request.body;
         checkRequired([code, email, nickname]);
-        const tokenSet = await this.authService.emailSignup(code, email, nickname);
+
+        const signupResult = await this.authService.emailSignup(code, email, nickname);
+        const { tokenSet, user } = signupResult;
 
         // TODO: domain setting 추가 해야됨
         response.cookie('accessToken', tokenSet.accessToken, { httpOnly: true, maxAge: 1000 * 60 * 60 * 7 * 24 });
         response.cookie('refreshToken', tokenSet.refreshToken, { httpOnly: true, maxAge: 1000 * 60 * 60 * 7 * 24 });
+        return user;
       });
     });
   };

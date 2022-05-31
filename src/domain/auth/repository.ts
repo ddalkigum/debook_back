@@ -14,8 +14,8 @@ export default class AuthRepository implements IAuthRepository {
 
   public insertCertification = async (
     certificationID: string,
-    code: string,
     email: string,
+    code: string,
     isSignup: boolean,
     deleteTime: string
   ) => {
@@ -27,6 +27,11 @@ export default class AuthRepository implements IAuthRepository {
       isSignup,
       deleteTime,
     });
+  };
+
+  public getCertificationByEmail = async (email: string) => {
+    this.logger.debug(`AuthRepository, getCertificationByCode, email: ${email}`);
+    return await this.mariaDB.findByColumn<CertificationEntity>(Constants.CERTIFICATION_TABLE, { email });
   };
 
   public getCertificationByCode = async (code: string) => {

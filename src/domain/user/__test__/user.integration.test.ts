@@ -13,12 +13,18 @@ const testUser = {
   id: 1,
   email: 'test@user.com',
   nickname: 'test',
+  profileImage: 'https://velog.velcdn.com/images/ddalkigum/profile/cf4d440d-6dbf-4306-8ab7-2fe5073f8459/social.png',
+  createdAt: new Date(Date.now()),
+  updatedAt: new Date(Date.now()),
 };
 
 const unknownUser = {
   id: 0,
   email: 'unknown@user.com',
   nickname: 'unknown',
+  profileImage: 'https://velog.velcdn.com/images/ddalkigum/profile/cf4d440d-6dbf-4306-8ab7-2fe5073f8459/social.png',
+  createdAt: new Date(Date.now()),
+  updatedAt: new Date(Date.now()),
 };
 
 afterAll(() => {
