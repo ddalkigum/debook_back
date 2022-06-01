@@ -1,6 +1,6 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 import { Constants } from '../../../../../constants';
-import { DateTimeEntity } from '../dateTime';
+import { DateTimeEntity } from '../datetime';
 
 @Entity({ name: Constants.USER_TABLE })
 export default class UserEntity extends DateTimeEntity {
