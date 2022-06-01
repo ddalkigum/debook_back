@@ -29,6 +29,7 @@
     "morgan": "^1.10.0",
     "mysql": "^2.18.1",
     "nodemon": "^2.0.15",
+    "ts-node": "^10.8.0",
     "typeorm": "^0.3.6",
     "winston": "^3.7.2",
     "winston-daily-rotate-file": "^4.6.1"

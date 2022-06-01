@@ -36,6 +36,9 @@ export class ExpressServer implements IServer {
     this.authRouter.init();
     this.partyRouter.init();
 
+    this.app.get('/health', (request, response, next) => {
+      response.send('Success');
+    });
     this.app.use('/v1/auth', this.authRouter.get());
     this.app.use('/v1/party', this.partyRouter.get());
 
