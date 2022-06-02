@@ -36,7 +36,7 @@ export default class Middleware implements IMiddleware {
       const foundTokenSet = await this.authRepository.getTokenByAccessToken(accessToken);
 
       if (!foundTokenSet) {
-        const error = ErrorGenerator.unAuthorized('TokenNotAvailable');
+        const error = ErrorGenerator.unAuthorized('UnavailableToken');
         next(error);
       }
 

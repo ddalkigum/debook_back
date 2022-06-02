@@ -16,9 +16,14 @@ export interface SignupResult {
   user: UserEntity;
 }
 
+export interface SigninResult {
+  tokenSet: TokenSet;
+  user: UserEntity;
+}
+
 export interface IAuthService {
   emailSignup: (code: string, email: string, nickname: string) => Promise<SignupResult>;
-  emailSignin: (code: string) => Promise<TokenSet>;
+  emailSignin: (code: string) => Promise<SigninResult>;
   sendEmail: (email: string) => Promise<string>;
   checkSignupRequest: (code: string) => Promise<CheckSignup>;
 }

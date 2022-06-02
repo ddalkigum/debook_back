@@ -23,7 +23,6 @@ export default class CertificationEntity {
   @BeforeInsert()
   setDeleteTime() {
     const timestamp = Date.now() + 60 * 60;
-    console.log(`timestamp, ${timestamp}`);
     this.deleteTime = new Date(timestamp).toISOString().slice(0, 19).replace('T', ' ');
   }
 }

@@ -39,24 +39,32 @@ export default class AuthService implements IAuthService {
   public emailSignin = async (code: string) => {
     this.logger.debug(`AuthService, emailSignin, code: ${code}`);
     const certification = await this.authRepository.getCertificationByCode(code);
-    if (!certification) throw new Error('AccessDenied');
-    if (certification.isSignup) throw new Error('NotSigninCertification');
+    if (!certification) {
+      const error = ErrorGenerator.badRequest('DoesNotExistCertification');
+      throw error;
+    }
+
+    if (certification.isSignup) {
+      const error = ErrorGenerator.badRequest('SignupCertification');
+      throw error;
+    }
 
     const foundUser = await this.userRepository.getUserByEmail(certification.email);
-    if (!foundUser) throw new Error('NotFoundUser');
+    if (!foundUser) {
+      const error = ErrorGenerator.badRequest('DoesNotExistUser');
+      throw error;
+    }
 
     const tokenID = util.uuid.generageUUID();
     const tokenSet = util.token.getAuthTokenSet({ userID: foundUser.id, tokenID }, config.authConfig.issuer);
 
     await this.authRepository.updateToken(foundUser.id, tokenSet);
     await this.authRepository.deleteCertificationByCode(code);
-    return tokenSet;
+    return { tokenSet, user: foundUser };
   };
 
   public sendEmail = async (email: string) => {
     this.logger.debug(`AuthService, sendEmail, email: ${email}`);
-    // const foundCertification = await this.authRepository.getCertificationByEmail(email);
-
     const code = util.hex.generateHexString(10);
     const foundUser = await this.userRepository.getUserByEmail(email);
     let isSignup = foundUser ? false : true;

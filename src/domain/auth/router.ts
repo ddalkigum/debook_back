@@ -31,10 +31,17 @@ export default class AuthRouter implements IHttpRouter {
         const code = request.query.code as string;
         checkRequired([code]);
 
-        const tokenSet = await this.authService.emailSignin(code);
+        const result = await this.authService.emailSignin(code);
         // TODO: domain setting 추가 해야됨
-        response.cookie('accessToken', tokenSet.accessToken, { httpOnly: true, maxAge: 1000 * 60 * 60 * 7 * 24 });
-        response.cookie('refreshToken', tokenSet.refreshToken, { httpOnly: true, maxAge: 1000 * 60 * 60 * 7 * 24 });
+        response.cookie('accessToken', result.tokenSet.accessToken, {
+          httpOnly: true,
+          maxAge: 1000 * 60 * 60 * 7 * 24,
+        });
+        response.cookie('refreshToken', result.tokenSet.refreshToken, {
+          httpOnly: true,
+          maxAge: 1000 * 60 * 60 * 7 * 24,
+        });
+        return result.user;
       });
     });
 
@@ -69,6 +76,14 @@ export default class AuthRouter implements IHttpRouter {
         response.cookie('accessToken', tokenSet.accessToken, { httpOnly: true, maxAge: 1000 * 60 * 60 * 7 * 24 });
         response.cookie('refreshToken', tokenSet.refreshToken, { httpOnly: true, maxAge: 1000 * 60 * 60 * 7 * 24 });
         return user;
+      });
+    });
+
+    this.router.delete('/logout', async (request: Request, response: Response, next: NextFunction) => {
+      this.apiResponse.generateResponse(request, response, next, async () => {
+        response.clearCookie('accessToken');
+        response.clearCookie('refreshToken');
+        return 'Success';
       });
     });
   };
