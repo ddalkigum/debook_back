@@ -5,6 +5,7 @@ export const TYPES = {
   MorganLogger: Symbol.for('MorganLogger'),
   MariaDB: Symbol.for('MariaDB'),
   SES: Symbol.for('SES'),
+  S3Client: Symbol.for('S3Client'),
 
   // Common
   ApiResponse: Symbol.for('ApiResponse'),
@@ -25,4 +26,7 @@ export const TYPES = {
   UserRouter: Symbol.for('UserRouter'),
   UserService: Symbol.for('UserService'),
   UserRepository: Symbol.for('UserRepository'),
+
+  // Image
+  ImageRouter: Symbol.for('ImageRouter'),
 };

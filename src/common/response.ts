@@ -33,14 +33,12 @@ export default class ApiResponse implements IApiResponse {
 
   public errorResponse = (error: BaseError, request: Request, response: Response, next: NextFunction) => {
     if (!error.statusCode) {
-      error = ErrorGenerator.internalServerError();
+      this.logger.error(error);
       error.statusCode = 500;
     }
 
     if (error.statusCode < 500) {
       this.logger.warn(`name: ${error.name}, message: ${error.message}`);
-    } else {
-      this.logger.error(`name: ${error.name}, message: ${error.message}, stack: ${error.stack}`);
     }
 
     response.json({

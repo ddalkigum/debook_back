@@ -14,10 +14,28 @@ export default class PartyRouter implements IHttpRouter {
   private router = Router();
 
   public init = () => {
+    // Get book info
+    this.router.get('/search/book', async (request: Request, response: Response, next: NextFunction) => {
+      this.apiResponse.generateResponse(request, response, next, async () => {
+        const { title, page } = request.query;
+        checkRequired([title]);
+        return await this.partyService.searchBook(String(title), Number(page));
+      });
+    });
+
     // Get main card list
     this.router.get('/recent', async (request: Request, response: Response, next: NextFunction) => {
       this.apiResponse.generateResponse(request, response, next, async () => {
         return await this.partyService.getMainCardList();
+      });
+    });
+
+    // Get relation party
+    this.router.get('/relation/:bookID', async (request: Request, response: Response, next: NextFunction) => {
+      this.apiResponse.generateResponse(request, response, next, async () => {
+        const { bookID } = request.params;
+        checkRequired([bookID]);
+        return await this.partyService.getRelationPartyList(bookID);
       });
     });
 
@@ -29,15 +47,6 @@ export default class PartyRouter implements IHttpRouter {
         checkRequired([nickname, partyTitle]);
 
         return await this.partyService.getPartyDetail(nickname, partyTitle, userID);
-      });
-    });
-
-    // Get relation party
-    this.router.get('/relation/:bookID', async (request: Request, response: Response, next: NextFunction) => {
-      this.apiResponse.generateResponse(request, response, next, async () => {
-        const { bookID } = request.params;
-        checkRequired([bookID]);
-        return await this.partyService.getRelationPartyList(bookID);
       });
     });
 

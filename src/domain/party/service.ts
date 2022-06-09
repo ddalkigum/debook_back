@@ -1,5 +1,6 @@
 import { inject, injectable } from 'inversify';
 import { IWinstonLogger } from '../../infrastructure/logger/interface';
+import { getBookInfo } from '../../lib/api/kakao';
 import { TYPES } from '../../type';
 import { IPartyRepository, IPartyService } from './interface';
 
@@ -42,4 +43,19 @@ export default class PartyService implements IPartyService {
   };
 
   public registParty = async () => {};
+
+  public searchBook = async (title: string, page: number) => {
+    this.logger.debug(`PartyService, searchBook, title: ${title}`);
+    const result = await getBookInfo(title, page);
+    const bookList = result.documents.map((book) => {
+      const { authors, thumbnail, title, isbn } = book;
+      return { id: isbn, authors, thumbnail, title };
+    });
+
+    const isEnd = result.meta.is_end;
+    const nextPage = isEnd ? undefined : page + 1;
+    const lastPage = Math.ceil(result.meta.pageable_count / 10);
+
+    return { bookList, meta: { page, nextPage, isEnd, lastPage } };
+  };
 }

@@ -1,5 +1,7 @@
-export type UploadType = 'user' | 'party';
+import aws from 'aws-sdk';
+
+export type UploadType = 'profile' | 'party';
 
 export interface IS3Client {
-  uploadImage: (type: UploadType, nickname: string) => Promise<any>;
+  get: () => aws.S3;
 }

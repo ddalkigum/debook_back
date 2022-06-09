@@ -7,6 +7,7 @@ import { IAuthRepository, TokenSet } from '../domain/auth/interface';
 import { IMiddleware } from './interface';
 import { TYPES } from '../type';
 import ErrorGenerator from '../common/error';
+import { IS3Client } from '../infrastructure/aws/s3/interface';
 
 const verifyToken = (token: string) => {
   let isExpired = false;
@@ -25,6 +26,7 @@ const verifyToken = (token: string) => {
 @injectable()
 export default class Middleware implements IMiddleware {
   @inject(TYPES.AuthRepository) private authRepository: IAuthRepository;
+  @inject(TYPES.S3Client) private s3Client: IS3Client;
 
   public authorization = async (request: Request, response: Response, next: NextFunction) => {
     try {
