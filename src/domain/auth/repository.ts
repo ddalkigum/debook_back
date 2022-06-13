@@ -12,31 +12,19 @@ export default class AuthRepository implements IAuthRepository {
   @inject(TYPES.WinstonLogger) private logger: IWinstonLogger;
   @inject(TYPES.MariaDB) private mariaDB: IMariaDB;
 
-  public insertCertification = async (
-    certificationID: string,
-    email: string,
-    code: string,
-    isSignup: boolean,
-    deleteTime: string
-  ) => {
-    this.logger.debug(`AuthRepository, insertCertification, code: ${code}, email: ${email}, isSignup: ${isSignup}`);
-    return await this.mariaDB.insert<CertificationEntity>(Constants.CERTIFICATION_TABLE, {
-      id: certificationID,
-      code,
-      email,
-      isSignup,
-      deleteTime,
-    });
+  public insertCertification = async (context: CertificationEntity) => {
+    this.logger.debug(`AuthRepository, insertCertification, context: ${context}`);
+    return await this.mariaDB.insert<CertificationEntity>(Constants.CERTIFICATION_TABLE, context);
   };
 
   public getCertificationByEmail = async (email: string) => {
     this.logger.debug(`AuthRepository, getCertificationByCode, email: ${email}`);
-    return await this.mariaDB.findByColumn<CertificationEntity>(Constants.CERTIFICATION_TABLE, { email });
+    return await this.mariaDB.findByUniqueColumn<CertificationEntity>(Constants.CERTIFICATION_TABLE, { email });
   };
 
   public getCertificationByCode = async (code: string) => {
     this.logger.debug(`AuthRepository, getCertificationByCode, code: ${code}`);
-    return await this.mariaDB.findByColumn<CertificationEntity>(Constants.CERTIFICATION_TABLE, { code });
+    return await this.mariaDB.findByUniqueColumn<CertificationEntity>(Constants.CERTIFICATION_TABLE, { code });
   };
 
   public deleteCertificationByCode = async (code: string) => {
@@ -68,6 +56,6 @@ export default class AuthRepository implements IAuthRepository {
   };
   public getTokenByAccessToken = async (accessToken: string) => {
     this.logger.debug(`AuthRepository, getTokenByAccessToken, accessToken: ${accessToken}`);
-    return await this.mariaDB.findByColumn<TokenEntity>(Constants.TOKEN_TABLE, { accessToken });
+    return await this.mariaDB.findByUniqueColumn<TokenEntity>(Constants.TOKEN_TABLE, { accessToken });
   };
 }

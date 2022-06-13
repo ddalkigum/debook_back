@@ -11,12 +11,12 @@ export default class UserRepository implements IUserRepository {
   @inject(TYPES.WinstonLogger) private logger: IWinstonLogger;
   @inject(TYPES.MariaDB) private mariaDB: IMariaDB;
 
-  public insertUser = async (email: string, nickname: string) => {
+  public insertUser = async (email: string, nickname: string, profileImage: string) => {
     this.logger.debug(`UserRepository, insertUser, email: ${email}, nickname: ${nickname}`);
-    return await this.mariaDB.insert<UserEntity>(Constants.USER_TABLE, {
+    return await this.mariaDB.insertWithoutID<UserEntity>(Constants.USER_TABLE, {
       email,
       nickname,
-      profileImage: 'https://velog.velcdn.com/images/ddalkigum/profile/cf4d440d-6dbf-4306-8ab7-2fe5073f8459/social.png',
+      profileImage,
     });
   };
 
@@ -27,12 +27,12 @@ export default class UserRepository implements IUserRepository {
 
   public getUserByNickname = async (nickname: string) => {
     this.logger.debug(`UserRepository, getUserByNickname, nickname: ${nickname}`);
-    return await this.mariaDB.findByColumn<UserEntity>(Constants.USER_TABLE, { nickname });
+    return await this.mariaDB.findByUniqueColumn<UserEntity>(Constants.USER_TABLE, { nickname });
   };
 
   public getUserByEmail = async (email: string) => {
     this.logger.debug(`UserRepository, getUserByEmail, email: ${email}`);
-    return await this.mariaDB.findByColumn<UserEntity>(Constants.USER_TABLE, { email });
+    return await this.mariaDB.findByUniqueColumn<UserEntity>(Constants.USER_TABLE, { email });
   };
 
   public deleteUser = async (userID: number) => {

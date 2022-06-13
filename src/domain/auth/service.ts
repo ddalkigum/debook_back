@@ -25,7 +25,9 @@ export default class AuthService implements IAuthService {
     const foundUser = await this.userRepository.getUserByNickname(nickname);
     if (foundUser) throw ErrorGenerator.badRequest('AlreadyExistUser');
 
-    const signupUser = await this.userRepository.insertUser(email, nickname);
+    const defaultProfileImage =
+      'https://https://cdn.debook.me/image/party/%EB%94%B8%EA%B8%B0%EA%B2%80/52be9e12-2623-4475-ada6-75c37e8e8ed1';
+    const signupUser = await this.userRepository.insertUser(email, nickname, defaultProfileImage);
 
     const tokenID = util.uuid.generageUUID();
     const tokenSet = util.token.getAuthTokenSet({ userID: signupUser.id, tokenID }, config.authConfig.issuer);
@@ -74,7 +76,7 @@ export default class AuthService implements IAuthService {
     const certificationID = util.uuid.generageUUID();
     const deleteTime = util.date.setDateTime(60 * 60);
 
-    await this.authRepository.insertCertification(certificationID, email, code, isSignup, deleteTime);
+    await this.authRepository.insertCertification({ id: certificationID, code, email, isSignup, deleteTime });
 
     this.sesClient.sendAuthEmail(email, code, isSignup, baseURL);
     return 'Success';

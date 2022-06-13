@@ -11,21 +11,9 @@ import { IS3Client } from '../../infrastructure/aws/s3/interface';
 import * as util from '../../util';
 
 export interface SendData {
-  /**
-   * URL of the uploaded object.
-   */
   Location: string;
-  /**
-   * ETag of the uploaded object.
-   */
   ETag: string;
-  /**
-   * Bucket to which the object was uploaded.
-   */
   Bucket: string;
-  /**
-   * Key to which the object was uploaded.
-   */
   Key: string;
 }
 
@@ -49,8 +37,6 @@ export default class ImageRouter implements IHttpRouter {
           const { nickname, type } = request.body;
 
           const fileID = util.uuid.generageUUID();
-          console.log(imageFile);
-          console.log('first: ', fileID);
           const upload: any = s3.upload(
             {
               Bucket: 'goback',
@@ -69,7 +55,6 @@ export default class ImageRouter implements IHttpRouter {
 
           const result = await Promise.resolve(upload);
           const encodedNickname = encodeURIComponent(nickname);
-          console.log('second: ', fileID);
           const imageURL = `https://cdn.debook.me/image/${type}/${encodedNickname}/${fileID}`;
           return imageURL;
         });

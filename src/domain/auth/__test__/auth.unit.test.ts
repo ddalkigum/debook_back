@@ -1,4 +1,3 @@
-import jwt from 'jsonwebtoken';
 import { Constants } from '../../../constants';
 import { container } from '../../../container';
 import { IMariaDB } from '../../../infrastructure/database/maria/interface';
@@ -6,12 +5,17 @@ import { TYPES } from '../../../type';
 import { IUserRepository } from '../../user/interface';
 import { IAuthRepository } from '../interface';
 import * as util from '../../../util';
+import { IWinstonLogger } from '../../../infrastructure/logger/interface';
 
 const userRepository: IUserRepository = container.get(TYPES.UserRepository);
 const authRepository: IAuthRepository = container.get(TYPES.AuthRepository);
+const winstonLogger: IWinstonLogger = container.get(TYPES.WinstonLogger);
 const mariaDB: IMariaDB = container.get(TYPES.MariaDB);
 
 beforeAll(async () => {
+  jest.spyOn(winstonLogger, 'debug').mockImplementation(() => {});
+  jest.spyOn(winstonLogger, 'warn').mockImplementation(() => {});
+  jest.spyOn(winstonLogger, 'info').mockImplementation(() => {});
   await mariaDB.init();
 });
 
@@ -39,8 +43,7 @@ const testSigninCertification = {
 describe('Certification test', () => {
   // insert certification test
   test('InsertCertification, Should return certification', async () => {
-    const { id, code, email, isSignup, deleteTime } = testSignupCertification;
-    const certification = await authRepository.insertCertification(id, code, email, isSignup, deleteTime);
+    const certification = await authRepository.insertCertification(testSignupCertification);
 
     expect(certification.code).toEqual(testSignupCertification.code);
     expect(certification.email).toEqual(testSignupCertification.email);
@@ -73,7 +76,18 @@ describe('Certification test', () => {
 });
 
 describe('Token test', () => {
-  const userID = 1;
+  let userID;
+  const testUser = {
+    email: 'test@user.com',
+    nickname: '딸기검',
+    profileImage: 'https://...',
+  };
+
+  beforeAll(async () => {
+    const insertResult = await userRepository.insertUser(testUser.email, testUser.nickname, testUser.profileImage);
+    userID = insertResult.id;
+  });
+
   const tokenID = util.uuid.generageUUID();
   const tokenSet = util.token.getAuthTokenSet({ userID, tokenID }, 'testIssuer');
 
@@ -82,14 +96,11 @@ describe('Token test', () => {
     const token = await authRepository.insertToken(userID, tokenID, tokenSet);
     expect(token.accessToken).toEqual(tokenSet.accessToken);
     expect(token.refreshToken).toEqual(tokenSet.refreshToken);
-    const issuer = jwt.decode(token.refreshToken);
-    console.log(`issuer: ${issuer}`);
   });
 
   // get token
   test('GetTokenByAccessToken, Should return token entity', async () => {
     const foundToken = await authRepository.getTokenByAccessToken(tokenSet.accessToken);
-    expect(foundToken.userID).toEqual(userID);
     expect(foundToken.accessToken).toEqual(tokenSet.accessToken);
     expect(foundToken.refreshToken).toEqual(tokenSet.refreshToken);
   });
@@ -107,6 +118,5 @@ describe('Token test', () => {
 
     expect(foundToken.accessToken).toEqual(newTokenSet.accessToken);
     expect(foundToken.refreshToken).toEqual(newTokenSet.refreshToken);
-    expect(foundToken.userID).toEqual(userID);
   });
 });

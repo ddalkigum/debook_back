@@ -51,6 +51,15 @@ export default class PartyRouter implements IHttpRouter {
     });
 
     // Regist party
+    this.router.post('/regist', async (request: Request, response: Response, next: NextFunction) => {
+      this.apiResponse.generateResponse(request, response, next, async () => {
+        const { party, book, userID, availableDay } = request.body;
+        const { title, memberOfRecruit, isOnline, description, location } = party;
+        checkRequired([title, memberOfRecruit, availableDay, isOnline, book, description]);
+        // regist party
+        this.partyService.registParty({ party, book, ownerID: userID, availableDay });
+      });
+    });
   };
 
   public get = () => {

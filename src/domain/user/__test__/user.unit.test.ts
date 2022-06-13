@@ -1,13 +1,18 @@
 import { Constants } from '../../../constants';
 import { container } from '../../../container';
 import { IMariaDB } from '../../../infrastructure/database/maria/interface';
+import { IWinstonLogger } from '../../../infrastructure/logger/interface';
 import { TYPES } from '../../../type';
 import { IUserRepository } from '../interface';
 
 const mariaDB = container.get<IMariaDB>(TYPES.MariaDB);
 const userRepository = container.get<IUserRepository>(TYPES.UserRepository);
+const winstonLogger = container.get<IWinstonLogger>(TYPES.WinstonLogger);
 
 beforeAll(async () => {
+  jest.spyOn(winstonLogger, 'warn').mockImplementation(() => {});
+  jest.spyOn(winstonLogger, 'info').mockImplementation(() => {});
+  jest.spyOn(winstonLogger, 'debug').mockImplementation(() => {});
   await mariaDB.init();
 });
 
@@ -19,12 +24,13 @@ afterAll(async () => {
 const testUser = {
   email: 'test@email.com',
   nickname: 'test',
+  profileImage: 'https://...',
 };
 let userID;
 
 describe('Insert user test', () => {
   test('Should return user email, nickname', async () => {
-    const result = await userRepository.insertUser(testUser.email, testUser.nickname);
+    const result = await userRepository.insertUser(testUser.email, testUser.nickname, testUser.profileImage);
     userID = result.id;
 
     expect(result.nickname).toEqual(testUser.nickname);

@@ -5,7 +5,8 @@ import { Constants } from '../../../constants';
 import { TYPES } from '../../../type';
 import { IWinstonLogger } from '../../logger/interface';
 import * as Entity from './entity';
-import { IEntity, IMariaDB } from './interface';
+import { DateTimeEntity } from './entity/datetime';
+import { IEntity, IMariaDB, InsertRowsWithoutID } from './interface';
 import { dataSource } from './ormConfig';
 
 const getEntity = <T>(tableName: Constants): EntityTarget<T> => {
@@ -18,6 +19,21 @@ const getEntity = <T>(tableName: Constants): EntityTarget<T> => {
 
     case Constants.USER_TABLE:
       return Entity.User;
+
+    case Constants.PARTY_TABLE:
+      return Entity.Party;
+
+    case Constants.PARTICIPANT_TABLE:
+      return Entity.Participant;
+
+    case Constants.DAY_TABLE:
+      return Entity.Day;
+
+    case Constants.AVAILABLE_DAY_TABLE:
+      return Entity.AvailableDay;
+
+    case Constants.BOOK_TABLE:
+      return Entity.Book;
   }
 };
 
@@ -51,7 +67,28 @@ export default class MariaDB implements IMariaDB {
     }
   };
 
-  public insert = async <T>(tableName: Constants, rows: Partial<T>): Promise<Partial<T> & IEntity> => {
+  public insert = async <T>(
+    tableName: Constants,
+    rows: Omit<T, keyof DateTimeEntity>
+  ): Promise<Omit<T, keyof DateTimeEntity>> => {
+    const queryRunner = this.connection.createQueryRunner();
+    try {
+      const EntityClass = getEntity<T>(tableName);
+      const result = await this.connection
+        .createQueryBuilder<T>(EntityClass, tableName)
+        .setQueryRunner(queryRunner)
+        .insert()
+        .into(EntityClass)
+        .values((rows as unknown) as QueryDeepPartialEntity<T>)
+        .execute();
+
+      return { id: result.identifiers[0].id, ...rows };
+    } finally {
+      await queryRunner.release();
+    }
+  };
+
+  public insertWithoutID = async <T>(tableName: Constants, rows: InsertRowsWithoutID<T>) => {
     const queryRunner = this.connection.createQueryRunner();
     try {
       const EntityClass = getEntity<T>(tableName);
@@ -92,8 +129,32 @@ export default class MariaDB implements IMariaDB {
         .createQueryBuilder<T>(EntityClass, tableName)
         .setQueryRunner(queryRunner)
         .where(rows)
+        .getMany();
+      return result;
+    } finally {
+      await queryRunner.release();
+    }
+  };
+
+  public findByUniqueColumn = async <T>(tableName: Constants, rows: Partial<T>) => {
+    const queryRunner = this.connection.createQueryRunner();
+    try {
+      const EntityClass = getEntity<T>(tableName);
+      const result = await this.connection
+        .createQueryBuilder<T>(EntityClass, tableName)
+        .setQueryRunner(queryRunner)
+        .where(rows)
         .getOne();
       return result;
+    } finally {
+      await queryRunner.release();
+    }
+  };
+
+  public getRowsByQuery = async (query: string, params?: any[]) => {
+    const queryRunner = this.connection.createQueryRunner();
+    try {
+      return await queryRunner.query(query, params);
     } finally {
       await queryRunner.release();
     }

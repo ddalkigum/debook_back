@@ -1,16 +1,26 @@
+import { Types } from 'aws-sdk/clients/acm';
 import { Constants } from '../../../constants';
+import { DateTimeEntity } from './entity/datetime';
 
 export interface IEntity {
   id: number | string;
 }
 
+export type Result<T> = T;
+
+export type InsertRows<T> = Omit<T, keyof DateTimeEntity>;
+export type InsertRowsWithoutID<T> = Omit<InsertRows<T> | 'id'>;
+
 export interface IMariaDB {
   init: () => Promise<void>;
   destroy: () => Promise<void>;
   deleteAll: (tableName: Constants) => Promise<void>;
-  insert: <T>(tableName: Constants, rows: Partial<T>) => Promise<Partial<T> & IEntity>;
+  insert: <T>(tableName: Constants, rows: InsertRows<T>) => Promise<InsertRows<T>>;
+  insertWithoutID: <T>(tableName: Constants, rows: InsertRowsWithoutID<T>) => Promise<InsertRows<T>>;
   findbyID: <T>(tableName: Constants, id: string | number) => Promise<T>;
-  findByColumn: <T>(tableName: Constants, rows: Partial<T>) => Promise<T>;
+  findByColumn: <T>(tableName: Constants, rows: Partial<T>) => Promise<T[]>;
+  findByUniqueColumn: <T>(tableName: Constants, rows: Partial<T>) => Promise<T>;
+  getRowsByQuery: (query: string, params?: any[]) => Promise<any>;
   deleteByColumn: <T>(tableName: Constants, row: Partial<T>) => Promise<void>;
   updateByColumn: <T>(tableName: Constants, whereCondition: Partial<T>, rows: Partial<T>) => Promise<Partial<T>>;
 }

@@ -10,7 +10,7 @@ export default class CertificationEntity {
   email: string;
 
   @Index()
-  @Column({ type: 'varchar', length: 10 })
+  @Column({ type: 'varchar', length: 20 })
   code: string;
 
   @Column({ type: 'boolean' })
@@ -19,10 +19,4 @@ export default class CertificationEntity {
   @Index()
   @Column({ type: 'datetime' })
   deleteTime: string;
-
-  @BeforeInsert()
-  setDeleteTime() {
-    const timestamp = Date.now() + 60 * 60;
-    this.deleteTime = new Date(timestamp).toISOString().slice(0, 19).replace('T', ' ');
-  }
 }

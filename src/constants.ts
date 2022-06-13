@@ -11,6 +11,6 @@ export enum Constants {
   PARTY_TABLE = 'party',
   PARTICIPANT_TABLE = 'participant',
   DAY_TABLE = 'day',
-  AVAILABLE_DAY_TABLE = 'availableTable',
+  AVAILABLE_DAY_TABLE = 'availableDay',
   BOOK_TABLE = 'book',
 }

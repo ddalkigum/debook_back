@@ -1,6 +1,10 @@
+import { DateTimeEntity } from '../../infrastructure/database/maria/entity/datetime';
+import AvailableDayEntity from '../../infrastructure/database/maria/entity/party/availableDay';
+import BookEntity from '../../infrastructure/database/maria/entity/party/book';
+import ParticipantEntity from '../../infrastructure/database/maria/entity/party/participant';
 import PartyEntity from '../../infrastructure/database/maria/entity/party/party';
-
-export type PartyContext = Omit<PartyEntity, 'id' | 'createdAt' | 'updatedAt'>;
+import UserEntity from '../../infrastructure/database/maria/entity/user/user';
+import { IEntity, InsertRows } from '../../infrastructure/database/maria/interface';
 
 export interface KakakoBookInfo {
   authors: string[];
@@ -41,19 +45,67 @@ export interface SearchBook {
   meta: BookMeta;
 }
 
+type BookContext = InsertRows<BookEntity>;
+
+export interface Day {
+  mon: 'mon';
+  tue: 'tue';
+  wed: 'wed';
+  thu: 'thu';
+  fri: 'fri';
+  sat: 'sat';
+  sun: 'sun';
+}
+
+export type IAvailableDay = keyof Day;
+
+export type InsertParty = Omit<PartyEntity, keyof DateTimeEntity>;
+
+export interface RegistPartyContext {
+  party: InsertParty;
+  availableDay: string[];
+  book: BookInfo;
+  ownerID: number;
+}
+
+export interface GetPartyDetail {
+  partyID: string;
+  partyTitle: string;
+  numberOfRecruit: number;
+  isOnline: boolean;
+  region?: string;
+  city?: string;
+  town?: string;
+  description: string;
+  createdAt: Date;
+  updatedAt: Date;
+  ownerID: number;
+  nickname: string;
+  profileImage: string;
+  bookID: string;
+  bookTitle: string;
+  bookThumbnail: string;
+  authors: string;
+}
+
 export interface IPartyService {
-  getMainCardList: () => Promise<any>;
+  getMainCardList: () => Promise<string>;
   getPartyDetail: (nickname: string, partyTitle: string, userID?: number) => Promise<any>;
   getRelationPartyList: (bookID: string) => Promise<any>;
-  registParty: (context: PartyContext) => Promise<any>;
+  registParty: (context: RegistPartyContext) => Promise<PartyContext>;
   searchBook: (title: string, page: number) => Promise<SearchBook>;
 }
 
 export interface IPartyRepository {
   getPartyList: () => Promise<any>;
-  getPartyDetail: (nickname: string, partyTitle: string) => Promise<any>;
-  getAvailableDay: (partyID: string) => Promise<any>;
+  getPartyDetail: (nickname: string, partyTitle: string) => Promise<GetPartyDetail[]>;
+  getPartyByTitle: (nickname: string, partyTitle: string) => Promise<PartyEntity[]>;
+  getAvailableDay: (partyID: string) => Promise<AvailableDayEntity[]>;
   getParticipant: (partyID: string) => Promise<any>;
   getPartyListByBookID: (bookID: string) => Promise<any>;
-  insertParty: (context: PartyContext) => Promise<any>;
+  insertParty: (party: InsertParty) => Promise<InsertParty>;
+  insertBook: (context: BookContext) => Promise<BookContext>;
+  getBook: (bookID: string) => Promise<Partial<BookEntity>>;
+  insertAvailableDay: (day: string, partyID: string) => Promise<Partial<AvailableDayEntity>>;
+  insertParticipant: (userID: number, partyID: string, isOwner: boolean) => Promise<Partial<ParticipantEntity>>;
 }
