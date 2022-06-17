@@ -5,13 +5,14 @@ import { IMiddleware } from '../../middleware/interface';
 import { TYPES } from '../../type';
 import { checkRequired } from '../../util';
 import { IHttpRouter } from '../interface';
-import { IAuthService } from './interface';
+import { IAuthRepository, IAuthService } from './interface';
 
 @injectable()
 export default class AuthRouter implements IHttpRouter {
   @inject(TYPES.ApiResponse) private apiResponse: IApiResponse;
   @inject(TYPES.Middleware) private middleware: IMiddleware;
   @inject(TYPES.AuthService) private authService: IAuthService;
+  @inject(TYPES.AuthRepository) private authRepository: IAuthRepository;
 
   private router = Router();
 
@@ -46,13 +47,9 @@ export default class AuthRouter implements IHttpRouter {
     });
 
     this.router.get(
-      '/check/login',
+      '/verify',
       this.middleware.authorization,
-      async (request: Request, response: Response, next: NextFunction) => {
-        this.apiResponse.generateResponse(request, response, next, async () => {
-          return 'Success';
-        });
-      }
+      async (request: Request, response: Response, next: NextFunction) => {}
     );
 
     // GET /v1/auth/check?code=?
@@ -81,6 +78,7 @@ export default class AuthRouter implements IHttpRouter {
 
     this.router.delete('/logout', async (request: Request, response: Response, next: NextFunction) => {
       this.apiResponse.generateResponse(request, response, next, async () => {
+        await this.authRepository.deleteToken(request.cookies.accessToken);
         response.clearCookie('accessToken');
         response.clearCookie('refreshToken');
         return 'Success';

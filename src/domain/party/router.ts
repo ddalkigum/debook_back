@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response, Router } from 'express';
 import { inject, injectable } from 'inversify';
 import { IApiResponse } from '../../common/interface';
+import { IMiddleware } from '../../middleware/interface';
 import { TYPES } from '../../type';
 import { checkRequired } from '../../util';
 import { IHttpRouter } from '../interface';
@@ -9,6 +10,7 @@ import { IPartyService } from './interface';
 @injectable()
 export default class PartyRouter implements IHttpRouter {
   @inject(TYPES.ApiResponse) private apiResponse: IApiResponse;
+  @inject(TYPES.Middleware) private middleware: IMiddleware;
   @inject(TYPES.PartyService) private partyService: IPartyService;
 
   private router = Router();
@@ -40,26 +42,30 @@ export default class PartyRouter implements IHttpRouter {
     });
 
     // Get party detail
-    this.router.get('/:nickname/:partyTitle', async (request: Request, response: Response, next: NextFunction) => {
+    this.router.get('/:nickname/:URLSlug', async (request: Request, response: Response, next: NextFunction) => {
       this.apiResponse.generateResponse(request, response, next, async () => {
-        const { nickname, partyTitle } = request.params;
+        const { nickname, URLSlug } = request.params;
         const { userID } = request.body;
-        checkRequired([nickname, partyTitle]);
+        checkRequired([nickname, URLSlug]);
 
-        return await this.partyService.getPartyDetail(nickname, partyTitle, userID);
+        return await this.partyService.getPartyDetail(nickname, URLSlug, userID);
       });
     });
 
     // Regist party
-    this.router.post('/regist', async (request: Request, response: Response, next: NextFunction) => {
-      this.apiResponse.generateResponse(request, response, next, async () => {
-        const { party, book, userID, availableDay } = request.body;
-        const { title, memberOfRecruit, isOnline, description, location } = party;
-        checkRequired([title, memberOfRecruit, availableDay, isOnline, book, description]);
-        // regist party
-        this.partyService.registParty({ party, book, ownerID: userID, availableDay });
-      });
-    });
+    this.router.post(
+      '/regist',
+      this.middleware.authorization,
+      async (request: Request, response: Response, next: NextFunction) => {
+        this.apiResponse.generateResponse(request, response, next, async () => {
+          const { party, book, userID, availableDay } = request.body;
+          const { title, memberOfRecruit, isOnline, description } = party;
+          checkRequired([title, memberOfRecruit, availableDay, isOnline, book, description]);
+          // regist party
+          await this.partyService.registParty({ party, book, ownerID: userID, availableDay });
+        });
+      }
+    );
   };
 
   public get = () => {

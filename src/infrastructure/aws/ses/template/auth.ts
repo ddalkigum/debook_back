@@ -22,7 +22,7 @@ export const getAuthEmailTemplate = (
             border: 1px solid #e6e6e6; 
             border-radius: 12px; ">
       
-            <h1 style="width: fit-content;display: block; margin: 0 auto; margin-top: 20px;">고백</h1>
+            <h1 style="width: fit-content;display: block; margin: 0 auto; margin-top: 20px;">Debook</h1>
             
             <div style="text-align: center; margin-top: 20px; width: 600px;">
               <span style="color: gray"><strong>안녕하세요!</strong> 혹시 본인이 보낸 요청이 아니라면,</br> 이 메일을 무시해주세요</span>
@@ -52,7 +52,7 @@ export const getAuthEmailTemplate = (
       },
       Subject: {
         Charset: 'UTF-8',
-        Data: `땡땡 ${emailTitle}`,
+        Data: `Debook${emailTitle}`,
       },
     },
     Source: config.awsConfig.adminEmail,

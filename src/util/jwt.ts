@@ -12,7 +12,7 @@ interface TokenSetPayload {
 }
 
 const generateAccessToken = (payload: AccessTokenPayload, issuer: string) => {
-  return jwt.sign({ user_id: payload.userID }, config.authConfig.jwtSignKey, {
+  return jwt.sign({ userID: payload.userID }, config.authConfig.jwtSignKey, {
     expiresIn: '2h',
     issuer,
     subject: 'access_token',
@@ -20,7 +20,7 @@ const generateAccessToken = (payload: AccessTokenPayload, issuer: string) => {
 };
 
 const generateRefreshToken = (payload: TokenSetPayload, issuer: string) => {
-  return jwt.sign({ user_id: payload.userID, token_id: payload.tokenID }, config.authConfig.jwtSignKey, {
+  return jwt.sign({ userID: payload.userID, token_id: payload.tokenID }, config.authConfig.jwtSignKey, {
     expiresIn: '60d',
     issuer,
     subject: 'refresh_token',
@@ -28,13 +28,13 @@ const generateRefreshToken = (payload: TokenSetPayload, issuer: string) => {
 };
 
 const getAuthTokenSet = (payload: TokenSetPayload, issuer: string): TokenSet => {
-  const accessToken = jwt.sign({ user_id: payload.userID }, config.authConfig.jwtSignKey, {
+  const accessToken = jwt.sign({ userID: payload.userID }, config.authConfig.jwtSignKey, {
     expiresIn: '2h',
     issuer,
     subject: 'access_token',
   });
 
-  const refreshToken = jwt.sign({ user_id: payload.userID, token_id: payload.tokenID }, config.authConfig.jwtSignKey, {
+  const refreshToken = jwt.sign({ userID: payload.userID, token_id: payload.tokenID }, config.authConfig.jwtSignKey, {
     expiresIn: '60d',
     issuer,
     subject: 'refresh_token',

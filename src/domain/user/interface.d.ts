@@ -4,7 +4,7 @@ import UserEntity from '../../infrastructure/database/maria/entity/user/user';
 export type InsertUser = Omit<UserEntity, keyof DateTimeEntity>;
 
 export interface IUserService {
-  getUserProfile: (nickname: string) => Promise<UserEntity>;
+  getUserProfile: (option: { nickname?: string; userID?: number }) => Promise<UserEntity>;
   secession: (userID: number, nickname: string) => Promise<Pick<UserEntity, 'id' | 'nickname'>>;
 }
 

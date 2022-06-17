@@ -11,12 +11,20 @@ export type Result<T> = T;
 export type InsertRows<T> = Omit<T, keyof DateTimeEntity>;
 export type InsertRowsWithoutID<T> = Omit<InsertRows<T> | 'id'>;
 
+export type InsertBulk<T> = Omit<
+  {
+    [K in keyof T]: T[K];
+  },
+  'id'
+>;
+
 export interface IMariaDB {
   init: () => Promise<void>;
   destroy: () => Promise<void>;
   deleteAll: (tableName: Constants) => Promise<void>;
   insert: <T>(tableName: Constants, rows: InsertRows<T>) => Promise<InsertRows<T>>;
   insertWithoutID: <T>(tableName: Constants, rows: InsertRowsWithoutID<T>) => Promise<InsertRows<T>>;
+  insertBulk: <T>(tableName: Constants, rows: InsertRowsWithoutID<T>[]) => Promise<InsertRowsWithoutID<T>[]>;
   findbyID: <T>(tableName: Constants, id: string | number) => Promise<T>;
   findByColumn: <T>(tableName: Constants, rows: Partial<T>) => Promise<T[]>;
   findByUniqueColumn: <T>(tableName: Constants, rows: Partial<T>) => Promise<T>;

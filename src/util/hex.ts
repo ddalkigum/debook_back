@@ -7,4 +7,8 @@ const generateHexString = (length: number): string => {
   return output;
 };
 
-export default { generateHexString };
+const generateURLSlug = () => {
+  return Date.now().toString(36);
+};
+
+export default { generateHexString, generateURLSlug };

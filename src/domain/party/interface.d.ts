@@ -72,6 +72,7 @@ export interface GetPartyDetail {
   partyID: string;
   partyTitle: string;
   numberOfRecruit: number;
+  slug: string;
   isOnline: boolean;
   region?: string;
   city?: string;
@@ -86,26 +87,42 @@ export interface GetPartyDetail {
   bookTitle: string;
   bookThumbnail: string;
   authors: string;
+  numberOfParticipant: string;
+}
+
+export type InsertAvailableDay = Omit<AvailableDayEntity, 'id'>;
+
+export interface PartyParticipant {
+  isParticipant: boolean;
+  count: number;
+}
+
+export interface PartyDetailResult {
+  owner: Pick<Userentity, 'id' | 'nickname' | 'profileImage'>;
+  party: Omit<PartyEntity, 'bookID' | 'ownerID'>;
+  book: BookEntity;
+  participant: PartyParticipant;
+  availableDay: AvailableDayEntity[];
 }
 
 export interface IPartyService {
-  getMainCardList: () => Promise<string>;
-  getPartyDetail: (nickname: string, partyTitle: string, userID?: number) => Promise<any>;
-  getRelationPartyList: (bookID: string) => Promise<any>;
+  getMainCardList: () => Promise<GetPartyDetail[]>;
+  getPartyDetail: (nickname: string, URLSlug: string, userID?: number) => Promise<any>;
+  getRelationPartyList: (bookID: string) => Promise<PartyDetailResult>;
   registParty: (context: RegistPartyContext) => Promise<PartyContext>;
   searchBook: (title: string, page: number) => Promise<SearchBook>;
 }
 
 export interface IPartyRepository {
-  getPartyList: () => Promise<any>;
-  getPartyDetail: (nickname: string, partyTitle: string) => Promise<GetPartyDetail[]>;
+  getPartyList: () => Promise<GetPartyDetail[]>;
+  getPartyDetail: (nickname: string, slug: string) => Promise<GetPartyDetail[]>;
   getPartyByTitle: (nickname: string, partyTitle: string) => Promise<PartyEntity[]>;
   getAvailableDay: (partyID: string) => Promise<AvailableDayEntity[]>;
-  getParticipant: (partyID: string) => Promise<any>;
+  getParticipant: (partyID: string) => Promise<ParticipantEntity[]>;
   getPartyListByBookID: (bookID: string) => Promise<any>;
   insertParty: (party: InsertParty) => Promise<InsertParty>;
   insertBook: (context: BookContext) => Promise<BookContext>;
   getBook: (bookID: string) => Promise<Partial<BookEntity>>;
-  insertAvailableDay: (day: string, partyID: string) => Promise<Partial<AvailableDayEntity>>;
+  insertAvailableDay: (availableDayList: InsertAvailableDay[]) => Promise<InsertAvailableDay[]>;
   insertParticipant: (userID: number, partyID: string, isOwner: boolean) => Promise<Partial<ParticipantEntity>>;
 }

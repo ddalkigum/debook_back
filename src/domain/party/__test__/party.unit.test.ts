@@ -41,7 +41,9 @@ const availableDayList = ['mon', 'fri'];
 const onlineParty: InsertParty = {
   id: util.uuid.generageUUID(),
   title: '제목제목',
+  slug: undefined,
   numberOfRecruit: 4,
+  numberOfParticipant: 1,
   isOnline: true,
   description: 'test description',
   ownerID: undefined,
@@ -79,11 +81,11 @@ describe('Party test', () => {
   });
 
   test('InsertAvailableDay, Should return available day list', async () => {
-    const result = await Promise.all(
-      availableDayList.map((availableDay) => {
-        return partyRepository.insertAvailableDay(availableDay, onlineParty.id);
-      })
-    );
+    const insertList = availableDayList.map((day) => {
+      return { dayID: day, partyID: onlineParty.id };
+    });
+
+    const result = await partyRepository.insertAvailableDay(insertList);
 
     result.map((value, index) => {
       expect(value.dayID).toEqual(availableDayList[index]);

@@ -6,7 +6,7 @@ import AvailableDayEntity from '../../infrastructure/database/maria/entity/party
 import { IMariaDB } from '../../infrastructure/database/maria/interface';
 import { IWinstonLogger } from '../../infrastructure/logger/interface';
 import { TYPES } from '../../type';
-import { BookContext, IPartyRepository, InsertParty, Day } from './interface';
+import { BookContext, IPartyRepository, InsertParty, Day, InsertAvailableDay } from './interface';
 import { getAvailableDayQuery, getPartyByTitleQuery, getPartyDetailQuery, getPartyListQuery } from './query';
 import ParticipantEntity from '../../infrastructure/database/maria/entity/party/participant';
 
@@ -22,7 +22,7 @@ export default class PartyRepository implements IPartyRepository {
   };
 
   public getPartyDetail = async (nickname: string, partyTitle: string) => {
-    this.logger.debug(`PartyRepository, getPartyDetail`);
+    this.logger.debug(`PartyRepository, getPartyDetail, nickname: ${nickname}, partyTitle: ${partyTitle}`);
     return await this.mariaDB.getRowsByQuery(getPartyDetailQuery.query, [nickname, partyTitle]);
   };
 
@@ -38,7 +38,7 @@ export default class PartyRepository implements IPartyRepository {
 
   public getParticipant = async (partyID: string) => {
     this.logger.debug(`PartyRepository, getParticipant`);
-    return await this.mariaDB.findByUniqueColumn<ParticipantEntity>(Constants.PARTICIPANT_TABLE, { partyID });
+    return await this.mariaDB.findByColumn<ParticipantEntity>(Constants.PARTICIPANT_TABLE, { partyID });
   };
 
   // TODO: Detail 페이지 밑에 보여줄 관련 목록
@@ -48,7 +48,7 @@ export default class PartyRepository implements IPartyRepository {
 
   public insertParty = async (context: InsertParty): Promise<InsertParty> => {
     this.logger.debug(`PartyRepository, insertParty, context: ${JSON.stringify(context)}`);
-    return await this.mariaDB.insert<PartyEntity>(Constants.PARTY_TABLE, context);
+    return await this.mariaDB.insert<PartyEntity>(Constants.PARTY_TABLE, { ...context, numberOfParticipant: 1 });
   };
 
   public insertBook = async (context: BookContext) => {
@@ -61,12 +61,9 @@ export default class PartyRepository implements IPartyRepository {
     return await this.mariaDB.findbyID<BookEntity>(Constants.BOOK_TABLE, bookID);
   };
 
-  public insertAvailableDay = async (day: string, partyID: string) => {
-    this.logger.debug(`PartyRepository, insertAvailableDay, day: ${day}, partyID: ${partyID}`);
-    return await this.mariaDB.insertWithoutID<AvailableDayEntity>(Constants.AVAILABLE_DAY_TABLE, {
-      dayID: day,
-      partyID,
-    });
+  public insertAvailableDay = async (availableDayList: InsertAvailableDay[]) => {
+    this.logger.debug(`PartyRepository, insertAvailableDay, availableDayList: ${JSON.stringify(availableDayList)}`);
+    return await this.mariaDB.insertBulk<AvailableDayEntity>(Constants.AVAILABLE_DAY_TABLE, availableDayList);
   };
 
   public insertParticipant = async (userID: number, partyID: string, isOwner: boolean) => {

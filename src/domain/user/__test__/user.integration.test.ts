@@ -15,8 +15,7 @@ const testUser = {
   id: 1,
   email: 'test@user.com',
   nickname: 'test',
-  profileImage:
-    'https://https://cdn.debook.me/image/party/%EB%94%B8%EA%B8%B0%EA%B2%80/52be9e12-2623-4475-ada6-75c37e8e8ed1',
+  profileImage: 'https://cdn.debook.me/image/party/%EB%94%B8%EA%B8%B0%EA%B2%80/52be9e12-2623-4475-ada6-75c37e8e8ed1',
   createdAt: new Date(Date.now()),
   updatedAt: new Date(Date.now()),
 };
@@ -25,8 +24,7 @@ const unknownUser = {
   id: 0,
   email: 'unknown@user.com',
   nickname: 'unknown',
-  profileImage:
-    'https://https://cdn.debook.me/image/party/%EB%94%B8%EA%B8%B0%EA%B2%80/52be9e12-2623-4475-ada6-75c37e8e8ed1',
+  profileImage: 'https://cdn.debook.me/image/party/%EB%94%B8%EA%B8%B0%EA%B2%80/52be9e12-2623-4475-ada6-75c37e8e8ed1',
   createdAt: new Date(Date.now()),
   updatedAt: new Date(Date.now()),
 };
@@ -45,7 +43,7 @@ describe('Get user profile', () => {
   test('Should return testuser', async () => {
     getUserByNickname.mockResolvedValueOnce(testUser);
 
-    const foundUser = await userService.getUserProfile(testUser.nickname);
+    const foundUser = await userService.getUserProfile({ nickname: testUser.nickname });
 
     expect(foundUser.nickname).toEqual(testUser.nickname);
     expect(foundUser.email).toEqual(testUser.email);

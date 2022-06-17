@@ -19,14 +19,13 @@ export default class AuthService implements IAuthService {
     this.logger.debug(`AuthService, emailSignup, code: ${code}, email: ${email}, nickname: ${nickname}`);
     const certification = await this.authRepository.getCertificationByCode(code);
 
-    if (!certification) throw ErrorGenerator.badRequest('Does not exist certification');
+    if (!certification) throw ErrorGenerator.badRequest('DoesNotExistCertification');
     if (!certification.isSignup) throw ErrorGenerator.badRequest('AlreadyExistUser');
 
     const foundUser = await this.userRepository.getUserByNickname(nickname);
-    if (foundUser) throw ErrorGenerator.badRequest('AlreadyExistUser');
+    if (foundUser) throw ErrorGenerator.badRequest('AlreadyExistNickname');
 
-    const defaultProfileImage =
-      'https://https://cdn.debook.me/image/party/%EB%94%B8%EA%B8%B0%EA%B2%80/52be9e12-2623-4475-ada6-75c37e8e8ed1';
+    const defaultProfileImage = 'https://cdn.debook.me/default/default_user.png';
     const signupUser = await this.userRepository.insertUser(email, nickname, defaultProfileImage);
 
     const tokenID = util.uuid.generageUUID();
@@ -57,8 +56,12 @@ export default class AuthService implements IAuthService {
       throw error;
     }
 
-    const tokenID = util.uuid.generageUUID();
-    const tokenSet = util.token.getAuthTokenSet({ userID: foundUser.id, tokenID }, config.authConfig.issuer);
+    const foundToken = await this.authRepository.getTokenByUserID(foundUser.id);
+
+    const tokenSet = util.token.getAuthTokenSet(
+      { userID: foundUser.id, tokenID: foundToken.id },
+      config.authConfig.issuer
+    );
 
     await this.authRepository.updateToken(foundUser.id, tokenSet);
     await this.authRepository.deleteCertificationByCode(code);
@@ -76,9 +79,9 @@ export default class AuthService implements IAuthService {
     const certificationID = util.uuid.generageUUID();
     const deleteTime = util.date.setDateTime(60 * 60);
 
+    await this.sesClient.sendAuthEmail(email, code, isSignup, baseURL);
     await this.authRepository.insertCertification({ id: certificationID, code, email, isSignup, deleteTime });
 
-    this.sesClient.sendAuthEmail(email, code, isSignup, baseURL);
     return 'Success';
   };
 

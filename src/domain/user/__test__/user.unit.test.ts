@@ -12,7 +12,7 @@ const winstonLogger = container.get<IWinstonLogger>(TYPES.WinstonLogger);
 beforeAll(async () => {
   jest.spyOn(winstonLogger, 'warn').mockImplementation(() => {});
   jest.spyOn(winstonLogger, 'info').mockImplementation(() => {});
-  jest.spyOn(winstonLogger, 'debug').mockImplementation(() => {});
+  // jest.spyOn(winstonLogger, 'debug').mockImplementation(() => {});
   await mariaDB.init();
 });
 
@@ -32,7 +32,7 @@ describe('Insert user test', () => {
   test('Should return user email, nickname', async () => {
     const result = await userRepository.insertUser(testUser.email, testUser.nickname, testUser.profileImage);
     userID = result.id;
-
+    console.log('result:', result);
     expect(result.nickname).toEqual(testUser.nickname);
     expect(result.email).toEqual(testUser.email);
   });

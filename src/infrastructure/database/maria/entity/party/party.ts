@@ -9,11 +9,17 @@ export default class PartyEntity extends DateTimeEntity {
   @PrimaryColumn({ type: 'varchar', length: 36 })
   id: string;
 
-  @Column({ type: 'varchar', length: '35' })
+  @Column({ type: 'varchar', length: 35 })
   title: string;
+
+  @Column({ type: 'varchar', nullable: true })
+  slug: string;
 
   @Column({ type: 'tinyint' })
   numberOfRecruit: number;
+
+  @Column({ type: 'tinyint', default: 0 })
+  numberOfParticipant: number;
 
   @Column({ type: 'boolean' })
   isOnline: boolean;

@@ -15,7 +15,10 @@ export const getPartyDetailQuery: IQuery<PartyEntity, UserEntity> = {
   query: `
   SELECT 
     party.id as partyID, 
+    party.title as partyTitle,
     party.numberOfRecruit,
+    party.numberOfParticipant,
+    party.slug,
     party.isOnline,
     party.region,
     party.city,
@@ -28,17 +31,12 @@ export const getPartyDetailQuery: IQuery<PartyEntity, UserEntity> = {
     book.id as bookID,
     book.title as bookTitle,
     book.thumbnail as bookThumbnail,
-    book.authors,
-    (SELECT 
-      COUNT(*) 
-    FROM participant
-    JOIN party ON party.id = participant.partyID
-    ) as numberOfParticipant
+    book.authors
   FROM party
   JOIN user ON user.id = party.ownerID
   JOIN book ON book.id = party.bookID
   WHERE user.nickname=?
-  AND party.title=?`,
+  AND party.slug=?`,
 };
 
 export const getPartyByTitleQuery: IQuery<PartyEntity, UserEntity> = {
@@ -68,24 +66,23 @@ export const getPartyListQuery = {
     party.id as partyID,
     party.title as partyTitle,
     party.numberOfRecruit,
+    party.numberOfParticipant,
+    party.slug,
     party.isOnline,
     party.region,
     party.city,
     party.town,
+    party.createdAt,
     user.id as ownerID,
     user.nickname,
     user.profileImage,
     book.id as bookID,
     book.title as bookTitle,
     book.thumbnail as bookThumbnail,
-    book.authors,
-    (SELECT 
-      COUNT(*) 
-    FROM participant
-    JOIN party ON party.id = participant.partyID
-    ) as numberOfParticipant
+    book.authors
   FROM party
   JOIN user ON user.id = party.ownerID
   JOIN book ON book.id = party.bookID
+  ORDER BY party.createdAt DESC
   `,
 };

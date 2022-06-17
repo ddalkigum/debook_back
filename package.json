@@ -8,7 +8,6 @@
     "start": "npm run build && export NODE_ENV=production && node ./dist/server.js",
     "start:dev": "export NODE_ENV=development && ts-node ./src/server.ts",
     "start:local": "export NODE_ENV=local && nodemon ./src/server.ts",
-    "start:test": "export NODE_ENV=test && nodemon ./src/server.ts",
     "test:unit": "export NODE_ENV=test && jest --config jest.unit.config.json --detectOpenHandles",
     "test:integration": "export NODE_ENV=test && jest --config jest.integration.config.json --detectOpenHandles",
     "docker:start": "docker-compose up -d",

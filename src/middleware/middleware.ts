@@ -1,4 +1,4 @@
-import jwt, { TokenExpiredError } from 'jsonwebtoken';
+import jwt, { decode, TokenExpiredError } from 'jsonwebtoken';
 import { NextFunction, Request, Response } from 'express';
 import { inject, injectable } from 'inversify';
 import * as config from '../config';
@@ -33,30 +33,28 @@ export default class Middleware implements IMiddleware {
       const { accessToken, refreshToken } = request.cookies;
       if (!accessToken || !refreshToken) {
         const error = ErrorGenerator.unAuthorized('TokenRequired');
-        next(error);
+        throw error;
       }
       const foundTokenSet = await this.authRepository.getTokenByAccessToken(accessToken);
 
       if (!foundTokenSet) {
         const error = ErrorGenerator.unAuthorized('UnavailableToken');
-        next(error);
+        throw error;
       }
 
-      const verifiedAcessToken = verifyToken(accessToken);
-      if (!verifiedAcessToken.isExpired) {
-        request.body.userID = verifiedAcessToken.userID;
-        next();
+      const verifiedAccessToken = verifyToken(accessToken);
+      if (!verifiedAccessToken.isExpired) {
+        request.body.userID = verifiedAccessToken.userID;
+        return next();
       }
 
       const verifiedRefreshToken = verifyToken(refreshToken);
-
-      const { userID } = verifiedAcessToken;
-      const tokenID = util.uuid.generageUUID();
+      const { userID, id } = foundTokenSet;
 
       let tokenSet: TokenSet;
       if (verifiedRefreshToken.isExpired) {
         // generate token set
-        tokenSet = util.token.getAuthTokenSet({ userID, tokenID }, config.authConfig.issuer);
+        tokenSet = util.token.getAuthTokenSet({ userID, tokenID: id }, config.authConfig.issuer);
       } else {
         // generate access token
         const newAccessToken = util.token.generateAccessToken({ userID }, config.authConfig.issuer);
@@ -65,10 +63,13 @@ export default class Middleware implements IMiddleware {
 
       // Update token
       await this.authRepository.updateToken(userID, tokenSet);
+      request.body.userID = userID;
       response.cookie('accessToken', tokenSet.accessToken, { httpOnly: true, maxAge: 1000 * 60 * 60 * 7 * 24 });
       response.cookie('refreshToken', tokenSet.refreshToken, { httpOnly: true, maxAge: 1000 * 60 * 60 * 7 * 24 });
       next();
     } catch (error) {
+      response.clearCookie('accessToken');
+      response.clearCookie('refreshToken');
       next(error);
     }
   };

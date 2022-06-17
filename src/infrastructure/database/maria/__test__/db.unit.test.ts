@@ -27,7 +27,7 @@ describe('InsertTest', () => {
     const email = 'sol35352000@gmail.com';
     const nickname = '10글자닉네임입니다';
     const profileImage =
-      'https://https://cdn.debook.me/image/party/%EB%94%B8%EA%B8%B0%EA%B2%80/52be9e12-2623-4475-ada6-75c37e8e8ed1';
+      'https://cdn.debook.me/image/party/%EB%94%B8%EA%B8%B0%EA%B2%80/52be9e12-2623-4475-ada6-75c37e8e8ed1';
     await mariaDB.insert<UserEntity>(Constants.USER_TABLE, { id, email, nickname, profileImage });
     const user = await mariaDB.findbyID<Entity.User>(Constants.USER_TABLE, id);
 

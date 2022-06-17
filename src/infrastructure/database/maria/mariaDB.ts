@@ -6,7 +6,7 @@ import { TYPES } from '../../../type';
 import { IWinstonLogger } from '../../logger/interface';
 import * as Entity from './entity';
 import { DateTimeEntity } from './entity/datetime';
-import { IEntity, IMariaDB, InsertRowsWithoutID } from './interface';
+import { IMariaDB, InsertRowsWithoutID, InsertRows } from './interface';
 import { dataSource } from './ormConfig';
 
 const getEntity = <T>(tableName: Constants): EntityTarget<T> => {
@@ -101,6 +101,23 @@ export default class MariaDB implements IMariaDB {
         .execute();
 
       return { id: result.identifiers[0].id, ...rows };
+    } finally {
+      await queryRunner.release();
+    }
+  };
+
+  public insertBulk = async <T>(tableName: Constants, rows: InsertRows<T>[]) => {
+    const queryRunner = this.connection.createQueryRunner();
+    try {
+      const EntityClass = getEntity<T>(tableName);
+      await this.connection
+        .createQueryBuilder<T>(EntityClass, tableName)
+        .setQueryRunner(queryRunner)
+        .insert()
+        .into(EntityClass)
+        .values((rows as unknown) as QueryDeepPartialEntity<T>)
+        .execute();
+      return rows;
     } finally {
       await queryRunner.release();
     }

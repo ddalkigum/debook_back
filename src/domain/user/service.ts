@@ -1,4 +1,5 @@
 import { inject, injectable } from 'inversify';
+import ErrorGenerator from '../../common/error';
 import { IWinstonLogger } from '../../infrastructure/logger/interface';
 import { TYPES } from '../../type';
 import { IUserRepository, IUserService } from './interface';
@@ -8,13 +9,20 @@ export default class UserService implements IUserService {
   @inject(TYPES.WinstonLogger) private logger: IWinstonLogger;
   @inject(TYPES.UserRepository) private userRepository: IUserRepository;
 
-  public getUserProfile = async (nickname: string) => {
-    const foundUser = await this.userRepository.getUserByNickname(nickname);
+  public getUserProfile = async (option: { nickname?: string; userID?: number }) => {
+    this.logger.debug(`UserService, getUserProfile`);
+    let foundUser;
+    const { nickname, userID } = option;
+    if (nickname) {
+      foundUser = await this.userRepository.getUserByNickname(nickname);
+    } else {
+      foundUser = await this.userRepository.getUserByID(userID);
+    }
 
-    if (!foundUser) throw new Error('NotFound');
-
-    // TODO: 현재 유저가 참가중인 파티 리스트 가지고 와야함
-    const partyList = [{ id: 'uuid', title: '제목' }];
+    if (!foundUser) {
+      const error = ErrorGenerator.notFound();
+      throw error;
+    }
 
     return foundUser;
   };

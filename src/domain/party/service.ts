@@ -3,9 +3,9 @@ import { IWinstonLogger } from '../../infrastructure/logger/interface';
 import { getBookInfo } from '../../lib/api/kakao';
 import { TYPES } from '../../type';
 import { IPartyRepository, IPartyService, RegistPartyContext } from './interface';
-import * as util from '../../util';
 import { IUserRepository } from '../user/interface';
 import ErrorGenerator from '../../common/error';
+import * as util from '../../util';
 
 @injectable()
 export default class PartyService implements IPartyService {
@@ -15,12 +15,14 @@ export default class PartyService implements IPartyService {
 
   public getMainCardList = async () => {
     this.logger.debug(`PartyService, getMainCardList`);
-    return await this.partyRepository.getPartyList();
+    const partyList = await this.partyRepository.getPartyList();
+
+    return partyList;
   };
 
-  public getPartyDetail = async (nickname: string, partyTitle: string, userID?: number) => {
-    this.logger.debug(`PartyService, getPartyDetail, nickname: ${nickname}, partyTitle: ${partyTitle}`);
-    const foundPartyList = await this.partyRepository.getPartyDetail(nickname, partyTitle);
+  public getPartyDetail = async (nickname: string, URLSlug: string, userID?: number) => {
+    this.logger.debug(`PartyService, getPartyDetail`);
+    const foundPartyList = await this.partyRepository.getPartyDetail(nickname, URLSlug);
 
     if (!foundPartyList || foundPartyList.length === 0) {
       const error = ErrorGenerator.notFound();
@@ -29,7 +31,7 @@ export default class PartyService implements IPartyService {
 
     const foundParty = foundPartyList[0];
     const availableDayList = await this.partyRepository.getAvailableDay(foundParty.partyID);
-    const participantList: any[] = await this.partyRepository.getParticipant(foundParty.partyID);
+    const participantList = await this.partyRepository.getParticipant(foundParty.partyID);
     let isParticipant = false;
 
     const foundParticipant = participantList.find((participant) => participant.userID === userID);
@@ -37,6 +39,8 @@ export default class PartyService implements IPartyService {
 
     const {
       partyID,
+      partyTitle,
+      slug,
       numberOfRecruit,
       isOnline,
       region,
@@ -61,6 +65,8 @@ export default class PartyService implements IPartyService {
       },
       party: {
         id: partyID,
+        title: partyTitle,
+        slug,
         numberOfRecruit,
         isOnline,
         region,
@@ -69,15 +75,18 @@ export default class PartyService implements IPartyService {
         description,
         createdAt,
         updatedAt,
-        availableDayList,
-        participant: isParticipant ? foundParticipant : undefined,
       },
       book: {
-        bookID,
-        bookTitle,
-        bookThumbnail,
+        id: bookID,
+        title: bookTitle,
+        thumbnail: bookThumbnail,
         authors,
       },
+      participant: {
+        isParticipant,
+        count: participantList.length,
+      },
+      availableDay: availableDayList,
     };
   };
 
@@ -96,22 +105,33 @@ export default class PartyService implements IPartyService {
 
     const { id, title, thumbnail, authors } = book;
     const foundBook = await this.partyRepository.getBook(book.id);
-    if (!foundBook) await this.partyRepository.insertBook({ id, title, thumbnail, authors: authors[0] });
+    if (!foundBook) await this.partyRepository.insertBook({ id, title, thumbnail, authors: authors.join(', ') });
 
-    // block party title duplicate
-    // FIXME: nickname, title로 찾아올때 URLSlug 이용 확인 추가
-    const foundParty = await this.partyRepository.getPartyByTitle(foundUser.nickname, party.title);
-    if (foundParty || foundParty.length === 1) {
-      const error = ErrorGenerator.badRequest('DuplicateTitle');
+    if (!foundUser) {
+      const error = ErrorGenerator.unAuthorized('UserNotFound');
       throw error;
     }
 
-    await this.partyRepository.insertParty({ id: partyID, ...party, ownerID, bookID: book.id });
-    await Promise.all(
-      availableDay.map((day) => {
-        this.partyRepository.insertAvailableDay(day, party.id);
-      })
-    );
+    const foundParty = await this.partyRepository.getPartyByTitle(foundUser.nickname, party.title);
+    console.log(foundParty);
+    const convertedTitle = party.title.replace(/\?/g, '').replace(/ /g, '-');
+    party.slug = convertedTitle;
+
+    if (foundParty) {
+      const slug = util.hex.generateURLSlug();
+      party.slug = `${convertedTitle}-${slug}`;
+    }
+
+    const insertedParty = await this.partyRepository.insertParty({ id: partyID, ...party, ownerID, bookID: book.id });
+    const insertDayList = availableDay.map((day) => {
+      return {
+        partyID: insertedParty.id,
+        dayID: day,
+      };
+    });
+    // 참가 인원에 admin 추가
+    await this.partyRepository.insertParticipant(ownerID, insertedParty.id, true);
+    await this.partyRepository.insertAvailableDay(insertDayList);
     return context;
   };
 
