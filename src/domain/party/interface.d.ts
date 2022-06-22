@@ -91,9 +91,9 @@ export interface GetPartyDetail {
 }
 
 export type InsertAvailableDay = Omit<AvailableDayEntity, 'id'>;
+export type RequestParticipate = Omit<ParticipateEntity, 'id'>;
 
 export interface PartyParticipant {
-  isParticipant: boolean;
   count: number;
 }
 
@@ -109,7 +109,9 @@ export interface IPartyService {
   getMainCardList: () => Promise<GetPartyDetail[]>;
   getPartyDetail: (nickname: string, URLSlug: string, userID?: number) => Promise<any>;
   getRelationPartyList: (bookID: string) => Promise<PartyDetailResult>;
+  getParticipatePartyList: (userID: number) => Promise<any>;
   registParty: (context: RegistPartyContext) => Promise<PartyContext>;
+  joinParty: (userID: number, partyID: string) => Promise<>;
   searchBook: (title: string, page: number) => Promise<SearchBook>;
 }
 
@@ -120,9 +122,11 @@ export interface IPartyRepository {
   getAvailableDay: (partyID: string) => Promise<AvailableDayEntity[]>;
   getParticipant: (partyID: string) => Promise<ParticipantEntity[]>;
   getPartyListByBookID: (bookID: string) => Promise<any>;
+  getParticipateParty: (userID: number) => Promise<any[]>;
   insertParty: (party: InsertParty) => Promise<InsertParty>;
   insertBook: (context: BookContext) => Promise<BookContext>;
   getBook: (bookID: string) => Promise<Partial<BookEntity>>;
   insertAvailableDay: (availableDayList: InsertAvailableDay[]) => Promise<InsertAvailableDay[]>;
   insertParticipant: (userID: number, partyID: string, isOwner: boolean) => Promise<Partial<ParticipantEntity>>;
+  updateParticipantCount: (partyID: string) => Promise<Partial<PartyEntity>>;
 }

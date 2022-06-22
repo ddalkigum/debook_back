@@ -7,7 +7,14 @@ import { IMariaDB } from '../../infrastructure/database/maria/interface';
 import { IWinstonLogger } from '../../infrastructure/logger/interface';
 import { TYPES } from '../../type';
 import { BookContext, IPartyRepository, InsertParty, Day, InsertAvailableDay } from './interface';
-import { getAvailableDayQuery, getPartyByTitleQuery, getPartyDetailQuery, getPartyListQuery } from './query';
+import {
+  getAvailableDayQuery,
+  getPartyByTitleQuery,
+  getPartyDetailQuery,
+  getPartyListQuery,
+  getParticipatePartyListQuery,
+  updateNumberOfParticipantCountQuery,
+} from './query';
 import ParticipantEntity from '../../infrastructure/database/maria/entity/party/participant';
 
 @injectable()
@@ -18,22 +25,22 @@ export default class PartyRepository implements IPartyRepository {
   // 메인 페이지 카드
   public getPartyList = async () => {
     this.logger.debug(`PartyRepository, getPartyList`);
-    return await this.mariaDB.getRowsByQuery(getPartyListQuery.query);
+    return await this.mariaDB.executeQuery(getPartyListQuery.query);
   };
 
   public getPartyDetail = async (nickname: string, partyTitle: string) => {
     this.logger.debug(`PartyRepository, getPartyDetail, nickname: ${nickname}, partyTitle: ${partyTitle}`);
-    return await this.mariaDB.getRowsByQuery(getPartyDetailQuery.query, [nickname, partyTitle]);
+    return await this.mariaDB.executeQuery(getPartyDetailQuery.query, [nickname, partyTitle]);
   };
 
   public getPartyByTitle = async (nickname: string, partyTitle: string) => {
     this.logger.debug(`PartyRepository, getPartyByTitle, nickname: ${nickname}, partyTitle: ${partyTitle}`);
-    return await this.mariaDB.getRowsByQuery(getPartyByTitleQuery.query, [nickname, partyTitle]);
+    return await this.mariaDB.executeQuery(getPartyByTitleQuery.query, [nickname, partyTitle]);
   };
 
   public getAvailableDay = async (partyID: string) => {
     this.logger.debug(`PartyRepository, getAvailableDay, partyID: ${partyID}`);
-    return await this.mariaDB.getRowsByQuery(getAvailableDayQuery.query, [partyID]);
+    return await this.mariaDB.executeQuery(getAvailableDayQuery.query, [partyID]);
   };
 
   public getParticipant = async (partyID: string) => {
@@ -44,6 +51,11 @@ export default class PartyRepository implements IPartyRepository {
   // TODO: Detail 페이지 밑에 보여줄 관련 목록
   public getPartyListByBookID = async () => {
     this.logger.debug(`PartyRepository, getPartyListByBookID`);
+  };
+
+  public getParticipateParty = async (userID: number) => {
+    this.logger.debug(`PartyRepository, getParticipateParty, userID: ${userID}`);
+    return this.mariaDB.executeQuery(getParticipatePartyListQuery.query, [userID]);
   };
 
   public insertParty = async (context: InsertParty): Promise<InsertParty> => {
@@ -77,5 +89,10 @@ export default class PartyRepository implements IPartyRepository {
       isOwner,
       isAccept,
     });
+  };
+
+  public updateParticipantCount = async (partyID: string) => {
+    this.logger.debug(`PartyRepository, updateParty, partyID: ${partyID}}`);
+    return await this.mariaDB.executeQuery(updateNumberOfParticipantCountQuery.query, [partyID]);
   };
 }

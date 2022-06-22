@@ -9,7 +9,7 @@ export default class CertificationEntity {
   @Column({ type: 'varchar', length: 100 })
   email: string;
 
-  @Index()
+  @Index('indexCertificationCode')
   @Column({ type: 'varchar', length: 20 })
   code: string;
 

@@ -1,9 +1,9 @@
-import jwt, { decode, TokenExpiredError } from 'jsonwebtoken';
+import jwt, { TokenExpiredError } from 'jsonwebtoken';
 import { NextFunction, Request, Response } from 'express';
 import { inject, injectable } from 'inversify';
 import * as config from '../config';
 import * as util from '../util';
-import { IAuthRepository, TokenSet } from '../domain/auth/interface';
+import { IAuthRepository } from '../domain/auth/interface';
 import { IMiddleware } from './interface';
 import { TYPES } from '../type';
 import ErrorGenerator from '../common/error';
@@ -31,46 +31,63 @@ export default class Middleware implements IMiddleware {
   public authorization = async (request: Request, response: Response, next: NextFunction) => {
     try {
       const { accessToken, refreshToken } = request.cookies;
-      if (!accessToken || !refreshToken) {
-        const error = ErrorGenerator.unAuthorized('TokenRequired');
-        throw error;
+
+      if (accessToken) {
+        const { userID, isExpired } = verifyToken(accessToken);
+        if (!isExpired) {
+          request.body.userID = userID;
+          return next();
+        }
       }
-      const foundTokenSet = await this.authRepository.getTokenByAccessToken(accessToken);
+
+      if (!refreshToken) {
+        const error = ErrorGenerator.unAuthorized('TokenRequired');
+        return next(error);
+      }
+
+      const { userID, tokenID } = verifyToken(refreshToken);
+
+      const foundTokenSet = await this.authRepository.getTokenByID(tokenID);
 
       if (!foundTokenSet) {
         const error = ErrorGenerator.unAuthorized('UnavailableToken');
-        throw error;
+        return next(error);
       }
 
-      const verifiedAccessToken = verifyToken(accessToken);
-      if (!verifiedAccessToken.isExpired) {
-        request.body.userID = verifiedAccessToken.userID;
-        return next();
-      }
-
-      const verifiedRefreshToken = verifyToken(refreshToken);
-      const { userID, id } = foundTokenSet;
-
-      let tokenSet: TokenSet;
-      if (verifiedRefreshToken.isExpired) {
-        // generate token set
-        tokenSet = util.token.getAuthTokenSet({ userID, tokenID: id }, config.authConfig.issuer);
-      } else {
-        // generate access token
-        const newAccessToken = util.token.generateAccessToken({ userID }, config.authConfig.issuer);
-        tokenSet = { accessToken: newAccessToken, refreshToken };
-      }
+      const newAccessToken = util.token.generateAccessToken({ userID }, config.authConfig.issuer);
+      const tokenSet = { accessToken: newAccessToken, refreshToken };
 
       // Update token
       await this.authRepository.updateToken(userID, tokenSet);
       request.body.userID = userID;
-      response.cookie('accessToken', tokenSet.accessToken, { httpOnly: true, maxAge: 1000 * 60 * 60 * 7 * 24 });
-      response.cookie('refreshToken', tokenSet.refreshToken, { httpOnly: true, maxAge: 1000 * 60 * 60 * 7 * 24 });
-      next();
+      response.cookie('accessToken', tokenSet.accessToken, {
+        httpOnly: true,
+        maxAge: config.authConfig.maxAge.accessToken,
+      });
+      response.cookie('refreshToken', tokenSet.refreshToken, {
+        httpOnly: true,
+        maxAge: config.authConfig.maxAge.refreshToken,
+      });
+      return next();
     } catch (error) {
       response.clearCookie('accessToken');
       response.clearCookie('refreshToken');
       next(error);
+    }
+  };
+
+  public checkLogin = (request: Request, response: Response, next: NextFunction) => {
+    const { accessToken, refreshToken } = request.cookies;
+    if (!accessToken || !refreshToken) {
+      return next();
+    }
+
+    try {
+      const { userID } = verifyToken(accessToken);
+      request.body.userID = userID;
+      return next();
+    } catch (error) {
+      return next();
     }
   };
 }

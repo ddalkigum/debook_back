@@ -16,7 +16,6 @@ export default class PartyService implements IPartyService {
   public getMainCardList = async () => {
     this.logger.debug(`PartyService, getMainCardList`);
     const partyList = await this.partyRepository.getPartyList();
-
     return partyList;
   };
 
@@ -32,10 +31,15 @@ export default class PartyService implements IPartyService {
     const foundParty = foundPartyList[0];
     const availableDayList = await this.partyRepository.getAvailableDay(foundParty.partyID);
     const participantList = await this.partyRepository.getParticipant(foundParty.partyID);
-    let isParticipant = false;
 
-    const foundParticipant = participantList.find((participant) => participant.userID === userID);
-    if (foundParticipant) isParticipant = true;
+    let isParticipant: boolean = false;
+
+    if (userID) {
+      const foundParticipant = participantList.find((participant) => participant.userID === userID);
+      if (foundParticipant) {
+        isParticipant = true;
+      }
+    }
 
     const {
       partyID,
@@ -97,6 +101,11 @@ export default class PartyService implements IPartyService {
     return partyList;
   };
 
+  public getParticipatePartyList = async (userID: number) => {
+    const result = await this.partyRepository.getParticipateParty(userID);
+    return result;
+  };
+
   public registParty = async (context: RegistPartyContext) => {
     const partyID = util.uuid.generageUUID();
     const { party, book, ownerID, availableDay } = context;
@@ -113,7 +122,6 @@ export default class PartyService implements IPartyService {
     }
 
     const foundParty = await this.partyRepository.getPartyByTitle(foundUser.nickname, party.title);
-    console.log(foundParty);
     const convertedTitle = party.title.replace(/\?/g, '').replace(/ /g, '-');
     party.slug = convertedTitle;
 
@@ -133,6 +141,27 @@ export default class PartyService implements IPartyService {
     await this.partyRepository.insertParticipant(ownerID, insertedParty.id, true);
     await this.partyRepository.insertAvailableDay(insertDayList);
     return context;
+  };
+
+  public joinParty = async (userID: number, partyID: string) => {
+    this.logger.debug(`PartyService, registParticipate, userID: ${userID}, partyID: ${partyID}`);
+    const participantList = await this.partyRepository.getParticipant(partyID);
+
+    // 보고있던 그룹이 삭제된 경우
+    if (!participantList) {
+      throw ErrorGenerator.notFound();
+    }
+    const isParticipant = participantList.find((participant) => {
+      return participant.userID === userID;
+    });
+
+    if (isParticipant) {
+      throw ErrorGenerator.badRequest('AlreadyRequestParticpate');
+    }
+
+    const participant = await this.partyRepository.insertParticipant(userID, partyID, false);
+    await this.partyRepository.updateParticipantCount(partyID);
+    return participant;
   };
 
   public searchBook = async (title: string, page: number) => {

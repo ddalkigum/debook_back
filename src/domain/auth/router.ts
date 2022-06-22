@@ -5,14 +5,14 @@ import { IMiddleware } from '../../middleware/interface';
 import { TYPES } from '../../type';
 import { checkRequired } from '../../util';
 import { IHttpRouter } from '../interface';
-import { IAuthRepository, IAuthService } from './interface';
+import { IAuthService } from './interface';
+import * as config from '../../config';
 
 @injectable()
 export default class AuthRouter implements IHttpRouter {
   @inject(TYPES.ApiResponse) private apiResponse: IApiResponse;
   @inject(TYPES.Middleware) private middleware: IMiddleware;
   @inject(TYPES.AuthService) private authService: IAuthService;
-  @inject(TYPES.AuthRepository) private authRepository: IAuthRepository;
 
   private router = Router();
 
@@ -36,11 +36,11 @@ export default class AuthRouter implements IHttpRouter {
         // TODO: domain setting 추가 해야됨
         response.cookie('accessToken', result.tokenSet.accessToken, {
           httpOnly: true,
-          maxAge: 1000 * 60 * 60 * 7 * 24,
+          maxAge: config.authConfig.maxAge.accessToken,
         });
         response.cookie('refreshToken', result.tokenSet.refreshToken, {
           httpOnly: true,
-          maxAge: 1000 * 60 * 60 * 7 * 24,
+          maxAge: config.authConfig.maxAge.refreshToken,
         });
         return result.user;
       });
@@ -49,7 +49,9 @@ export default class AuthRouter implements IHttpRouter {
     this.router.get(
       '/verify',
       this.middleware.authorization,
-      async (request: Request, response: Response, next: NextFunction) => {}
+      async (request: Request, response: Response, next: NextFunction) => {
+        response.send('Success');
+      }
     );
 
     // GET /v1/auth/check?code=?
@@ -70,15 +72,20 @@ export default class AuthRouter implements IHttpRouter {
         const { tokenSet, user } = signupResult;
 
         // TODO: domain setting 추가 해야됨
-        response.cookie('accessToken', tokenSet.accessToken, { httpOnly: true, maxAge: 1000 * 60 * 60 * 7 * 24 });
-        response.cookie('refreshToken', tokenSet.refreshToken, { httpOnly: true, maxAge: 1000 * 60 * 60 * 7 * 24 });
+        response.cookie('accessToken', tokenSet.accessToken, {
+          httpOnly: true,
+          maxAge: config.authConfig.maxAge.accessToken,
+        });
+        response.cookie('refreshToken', tokenSet.refreshToken, {
+          httpOnly: true,
+          maxAge: config.authConfig.maxAge.refreshToken,
+        });
         return user;
       });
     });
 
     this.router.delete('/logout', async (request: Request, response: Response, next: NextFunction) => {
       this.apiResponse.generateResponse(request, response, next, async () => {
-        await this.authRepository.deleteToken(request.cookies.accessToken);
         response.clearCookie('accessToken');
         response.clearCookie('refreshToken');
         return 'Success';

@@ -54,9 +54,9 @@ export default class AuthRepository implements IAuthRepository {
       refreshToken,
     });
   };
-  public getTokenByAccessToken = async (accessToken: string) => {
-    this.logger.debug(`AuthRepository, getTokenByAccessToken, accessToken: ${accessToken}`);
-    return await this.mariaDB.findByUniqueColumn<TokenEntity>(Constants.TOKEN_TABLE, { accessToken });
+  public getTokenByID = async (id: string) => {
+    this.logger.debug(`AuthRepository, getTokenByAccessToken, id: ${id}`);
+    return await this.mariaDB.findByUniqueColumn<TokenEntity>(Constants.TOKEN_TABLE, { id });
   };
 
   public getTokenByUserID = async (userID: number) => {

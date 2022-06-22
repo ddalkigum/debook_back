@@ -1,4 +1,4 @@
-import jwt from 'jsonwebtoken';
+import jwt, { TokenExpiredError } from 'jsonwebtoken';
 import * as config from '../config';
 import { TokenSet } from '../domain/auth/interface';
 
@@ -13,15 +13,15 @@ interface TokenSetPayload {
 
 const generateAccessToken = (payload: AccessTokenPayload, issuer: string) => {
   return jwt.sign({ userID: payload.userID }, config.authConfig.jwtSignKey, {
-    expiresIn: '2h',
+    expiresIn: '1h',
     issuer,
     subject: 'access_token',
   });
 };
 
 const generateRefreshToken = (payload: TokenSetPayload, issuer: string) => {
-  return jwt.sign({ userID: payload.userID, token_id: payload.tokenID }, config.authConfig.jwtSignKey, {
-    expiresIn: '60d',
+  return jwt.sign({ userID: payload.userID, tokenID: payload.tokenID }, config.authConfig.jwtSignKey, {
+    expiresIn: '30d',
     issuer,
     subject: 'refresh_token',
   });
@@ -29,13 +29,13 @@ const generateRefreshToken = (payload: TokenSetPayload, issuer: string) => {
 
 const getAuthTokenSet = (payload: TokenSetPayload, issuer: string): TokenSet => {
   const accessToken = jwt.sign({ userID: payload.userID }, config.authConfig.jwtSignKey, {
-    expiresIn: '2h',
+    expiresIn: '1h',
     issuer,
     subject: 'access_token',
   });
 
-  const refreshToken = jwt.sign({ userID: payload.userID, token_id: payload.tokenID }, config.authConfig.jwtSignKey, {
-    expiresIn: '60d',
+  const refreshToken = jwt.sign({ userID: payload.userID, tokenID: payload.tokenID }, config.authConfig.jwtSignKey, {
+    expiresIn: '30d',
     issuer,
     subject: 'refresh_token',
   });
@@ -43,4 +43,18 @@ const getAuthTokenSet = (payload: TokenSetPayload, issuer: string): TokenSet => 
   return { accessToken, refreshToken };
 };
 
-export default { generateAccessToken, generateRefreshToken, getAuthTokenSet };
+const verifyToken = (token: string) => {
+  let isExpired = false;
+  try {
+    const { issuer } = config.authConfig;
+    const verifiedToken: any = jwt.verify(token, config.authConfig.jwtSignKey, { issuer });
+    return { ...verifiedToken, isExpired };
+  } catch (error) {
+    if (error instanceof TokenExpiredError) {
+      return { isExpired: true };
+    }
+    throw error;
+  }
+};
+
+export default { generateAccessToken, generateRefreshToken, getAuthTokenSet, verifyToken };

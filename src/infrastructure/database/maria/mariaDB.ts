@@ -130,6 +130,7 @@ export default class MariaDB implements IMariaDB {
       const result = await this.connection
         .createQueryBuilder(EntityClass, tableName)
         .setQueryRunner(queryRunner)
+        .loadAllRelationIds()
         .where({ id })
         .getOne();
       return result as T;
@@ -145,6 +146,7 @@ export default class MariaDB implements IMariaDB {
       const result = await this.connection
         .createQueryBuilder<T>(EntityClass, tableName)
         .setQueryRunner(queryRunner)
+        .loadAllRelationIds()
         .where(rows)
         .getMany();
       return result;
@@ -160,6 +162,7 @@ export default class MariaDB implements IMariaDB {
       const result = await this.connection
         .createQueryBuilder<T>(EntityClass, tableName)
         .setQueryRunner(queryRunner)
+        .loadAllRelationIds()
         .where(rows)
         .getOne();
       return result;
@@ -168,7 +171,7 @@ export default class MariaDB implements IMariaDB {
     }
   };
 
-  public getRowsByQuery = async (query: string, params?: any[]) => {
+  public executeQuery = async (query: string, params?: any[]) => {
     const queryRunner = this.connection.createQueryRunner();
     try {
       return await queryRunner.query(query, params);

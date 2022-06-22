@@ -57,7 +57,6 @@ export default class AuthService implements IAuthService {
     }
 
     const foundToken = await this.authRepository.getTokenByUserID(foundUser.id);
-
     const tokenSet = util.token.getAuthTokenSet(
       { userID: foundUser.id, tokenID: foundToken.id },
       config.authConfig.issuer

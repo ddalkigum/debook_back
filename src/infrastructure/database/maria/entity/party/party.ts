@@ -1,4 +1,4 @@
-import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
+import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, PrimaryColumn } from 'typeorm';
 import { Constants } from '../../../../../constants';
 import { DateTimeEntity } from '../datetime';
 import UserEntity from '../user/user';
@@ -9,7 +9,7 @@ export default class PartyEntity extends DateTimeEntity {
   @PrimaryColumn({ type: 'varchar', length: 36 })
   id: string;
 
-  @Column({ type: 'varchar', length: 35 })
+  @Column({ type: 'varchar', length: 30 })
   title: string;
 
   @Column({ type: 'varchar', nullable: true })
@@ -20,6 +20,12 @@ export default class PartyEntity extends DateTimeEntity {
 
   @Column({ type: 'tinyint', default: 0 })
   numberOfParticipant: number;
+
+  @Column({ type: 'varchar' })
+  kakaoOpenChatLink: string;
+
+  @Column({ type: 'varchar' })
+  kakaoOpenChatPassword: string;
 
   @Column({ type: 'boolean' })
   isOnline: boolean;

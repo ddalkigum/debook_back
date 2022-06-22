@@ -28,7 +28,7 @@ export interface IMariaDB {
   findbyID: <T>(tableName: Constants, id: string | number) => Promise<T>;
   findByColumn: <T>(tableName: Constants, rows: Partial<T>) => Promise<T[]>;
   findByUniqueColumn: <T>(tableName: Constants, rows: Partial<T>) => Promise<T>;
-  getRowsByQuery: (query: string, params?: any[]) => Promise<any>;
+  executeQuery: (query: string, params?: any[]) => Promise<any>;
   deleteByColumn: <T>(tableName: Constants, row: Partial<T>) => Promise<void>;
   updateByColumn: <T>(tableName: Constants, whereCondition: Partial<T>, rows: Partial<T>) => Promise<Partial<T>>;
 }

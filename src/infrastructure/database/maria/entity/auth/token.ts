@@ -11,7 +11,6 @@ export default class TokenEntity {
   @JoinColumn({ name: 'userID' })
   userID: number;
 
-  @Index('access_token_index')
   @Column({ type: 'varchar', length: 250 })
   accessToken: string;
 

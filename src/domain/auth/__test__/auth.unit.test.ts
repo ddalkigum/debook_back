@@ -100,13 +100,13 @@ describe('Token test', () => {
 
   // get token
   test('GetTokenByAccessToken, Should return token entity', async () => {
-    const foundToken = await authRepository.getTokenByAccessToken(tokenSet.accessToken);
+    const foundToken = await authRepository.getTokenByID(tokenID);
     expect(foundToken.accessToken).toEqual(tokenSet.accessToken);
     expect(foundToken.refreshToken).toEqual(tokenSet.refreshToken);
   });
 
   test('GetTokenByAccessToken, Should return null', async () => {
-    const foundToken = await authRepository.getTokenByAccessToken('fakeAccessToken');
+    const foundToken = await authRepository.getTokenByID('fakeAccessToken');
     expect(foundToken).toBeNull();
   });
 
@@ -114,7 +114,7 @@ describe('Token test', () => {
   test('UpdateToken, Should return updated token', async () => {
     const newTokenSet = util.token.getAuthTokenSet({ userID, tokenID }, 'testIssuer');
     const updatedToken = await authRepository.updateToken(userID, newTokenSet);
-    const foundToken = await authRepository.getTokenByAccessToken(updatedToken.accessToken);
+    const foundToken = await authRepository.getTokenByID(tokenID);
 
     expect(foundToken.accessToken).toEqual(newTokenSet.accessToken);
     expect(foundToken.refreshToken).toEqual(newTokenSet.refreshToken);
