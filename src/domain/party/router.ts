@@ -63,6 +63,39 @@ export default class PartyRouter implements IHttpRouter {
       }
     );
 
+    this.router.post(
+      '/notification',
+      this.middleware.authorization,
+      async (request: Request, response: Response, next: NextFunction) => {
+        this.apiResponse.generateResponse(request, response, next, async () => {
+          const { userID, partyID } = request.body;
+          const schema = Joi.object({
+            userID: Joi.number().required(),
+            partyID: Joi.string().required(),
+          });
+
+          validateContext(request.body, schema);
+          return await this.partyService.registNotification(userID, partyID);
+        });
+      }
+    );
+
+    this.router.get(
+      '/notification',
+      this.middleware.authorization,
+      async (request: Request, response: Response, next: NextFunction) => {
+        this.apiResponse.generateResponse(request, response, next, async () => {
+          const { userID } = request.body;
+          const schema = Joi.object({
+            userID: Joi.number().required(),
+          });
+          validateContext(request.body, schema);
+
+          return await this.partyService.getOpenCharNotification(userID);
+        });
+      }
+    );
+
     // Get relation party
     this.router.get('/relation/:bookID', async (request: Request, response: Response, next: NextFunction) => {
       this.apiResponse.generateResponse(request, response, next, async () => {

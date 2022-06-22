@@ -137,7 +137,7 @@ export default class PartyService implements IPartyService {
         dayID: day,
       };
     });
-    // 참가 인원에 admin 추가
+
     await this.partyRepository.insertParticipant(ownerID, insertedParty.id, true);
     await this.partyRepository.insertAvailableDay(insertDayList);
     return context;
@@ -151,6 +151,7 @@ export default class PartyService implements IPartyService {
     if (!participantList) {
       throw ErrorGenerator.notFound();
     }
+
     const isParticipant = participantList.find((participant) => {
       return participant.userID === userID;
     });
@@ -177,5 +178,42 @@ export default class PartyService implements IPartyService {
     const lastPage = Math.ceil(result.meta.pageable_count / 10);
 
     return { bookList, meta: { page, nextPage, isEnd, lastPage } };
+  };
+
+  public registNotification = async (userID: number, partyID: string) => {
+    // found party
+    const foundParty = await this.partyRepository.getPartyEntity(partyID);
+    if (!foundParty) {
+      const error = ErrorGenerator.notFound();
+      throw error;
+    }
+
+    // found party , openchat column -> insert noti
+    const notificationID = util.uuid.generageUUID();
+    return await this.partyRepository.insertNotificationOpenChat({
+      id: notificationID,
+      userID,
+      partyID,
+    });
+  };
+
+  public getOpenCharNotification = async (userID: number) => {
+    const foundNotificationList = await this.partyRepository.getNotificationOpenChatList(userID);
+    return foundNotificationList.map((noti) => {
+      const { notificationID, title, partyID, openChatURL, openChatPassword, bookID, thumbnail } = noti;
+      return {
+        notification: { id: notificationID },
+        party: {
+          id: partyID,
+          title,
+          openChatURL,
+          openChatPassword,
+        },
+        book: {
+          id: bookID,
+          thumbnail,
+        },
+      };
+    });
   };
 }

@@ -17,6 +17,6 @@ export default class SES implements ISES {
   public sendAuthEmail = async (userEmail: string, code: string, isSignup: boolean, baseURL: string) => {
     const template = getAuthEmailTemplate(userEmail, code, baseURL, isSignup);
     const command = new SendEmailCommand(template);
-    await this.client.send(command);
+    this.client.send(command);
   };
 }
