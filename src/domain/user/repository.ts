@@ -35,6 +35,13 @@ export default class UserRepository implements IUserRepository {
     return await this.mariaDB.findByUniqueColumn<UserEntity>(Constants.USER_TABLE, { email });
   };
 
+  public updateUser = async (userID: number, updateCondition: Partial<UserEntity>) => {
+    this.logger.debug(
+      `UserRepository, updateUser, userID: ${userID}, updateCondition: ${JSON.stringify(updateCondition)}`
+    );
+    return await this.mariaDB.updateByColumn<UserEntity>(Constants.USER_TABLE, { id: userID }, updateCondition);
+  };
+
   public deleteUser = async (userID: number) => {
     this.logger.debug(`UserRepository, deleteUser, userID: ${userID}`);
     return await this.mariaDB.deleteByColumn<UserEntity>(Constants.USER_TABLE, { id: userID });

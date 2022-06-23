@@ -20,8 +20,9 @@ import {
   getPartyDetailQuery,
   getPartyListQuery,
   getParticipatePartyListQuery,
-  updateNumberOfParticipantCountQuery,
   getNotificationOpenChatListQuery,
+  increaseCountOfParticipantQuery,
+  decreaseCountOfParticipantQuery,
 } from './query';
 import ParticipantEntity from '../../infrastructure/database/maria/entity/party/participant';
 import NotificationOpenChatEntity from '../../infrastructure/database/maria/entity/notification/openChat';
@@ -87,9 +88,25 @@ export default class PartyRepository implements IPartyRepository {
     return await this.mariaDB.findByColumn<ParticipantEntity>(Constants.PARTICIPANT_TABLE, { partyID });
   };
 
-  public updateParticipantCount = async (partyID: string) => {
-    this.logger.debug(`PartyRepository, updateParty, partyID: ${partyID}}`);
-    return await this.mariaDB.executeQuery(updateNumberOfParticipantCountQuery.query, [partyID]);
+  public getParticipantEntity = async (findCondition: Partial<ParticipantEntity>) => {
+    this.logger.debug(`PartyRepository, getParticipantEntity, findCondition: ${JSON.stringify(findCondition)}`);
+    const foundList = await this.mariaDB.findByColumn<ParticipantEntity>(Constants.PARTICIPANT_TABLE, findCondition);
+    return foundList[0];
+  };
+
+  public deleteParticipantEntity = async (findCondition: Partial<ParticipantEntity>) => {
+    this.logger.debug(`PartyRepository, deleteParticipanEntityt, findCondition: ${JSON.stringify(findCondition)}`);
+    return await this.mariaDB.deleteByColumn<ParticipantEntity>(Constants.PARTICIPANT_TABLE, findCondition);
+  };
+
+  public increaseParticipantCount = async (partyID: string) => {
+    this.logger.debug(`PartyRepository, increaseParticipantCount, partyID: ${partyID}}`);
+    return await this.mariaDB.executeQuery(increaseCountOfParticipantQuery.query, [partyID]);
+  };
+
+  public decreaseParticipantCount = async (partyID: string) => {
+    this.logger.debug(`PartyRepository, decreaseParticipantCount, partyID: ${partyID}}`);
+    return await this.mariaDB.executeQuery(decreaseCountOfParticipantQuery.query, [partyID]);
   };
 
   // AvailableDay
@@ -126,5 +143,10 @@ export default class PartyRepository implements IPartyRepository {
   public getNotificationOpenChatList = async (userID: number) => {
     this.logger.debug(`PartyRepository, getNotificationOpenChat, userID: ${userID}`);
     return await this.mariaDB.executeQuery(getNotificationOpenChatListQuery.query, [userID]);
+  };
+
+  public deleteNotificationOpenChat = async (findCondition: Partial<NotificationOpenChatEntity>) => {
+    this.logger.debug(`PartyRepository, deleteNotificationOpenChat, findCondition: ${JSON.stringify(findCondition)}`);
+    await this.mariaDB.deleteByColumn(Constants.NOTIFICATION_OPEN_CHAT_TABLE, findCondition);
   };
 }

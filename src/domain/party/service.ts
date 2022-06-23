@@ -33,11 +33,15 @@ export default class PartyService implements IPartyService {
     const participantList = await this.partyRepository.getParticipant(foundParty.partyID);
 
     let isParticipant: boolean = false;
+    let isOwner: boolean = false;
 
     if (userID) {
       const foundParticipant = participantList.find((participant) => participant.userID === userID);
       if (foundParticipant) {
         isParticipant = true;
+        if (foundParticipant.isOwner) {
+          isOwner = true;
+        }
       }
     }
 
@@ -87,6 +91,7 @@ export default class PartyService implements IPartyService {
         authors,
       },
       participant: {
+        isOwner,
         isParticipant,
         count: participantList.length,
       },
@@ -145,12 +150,19 @@ export default class PartyService implements IPartyService {
 
   public joinParty = async (userID: number, partyID: string) => {
     this.logger.debug(`PartyService, registParticipate, userID: ${userID}, partyID: ${partyID}`);
-    const participantList = await this.partyRepository.getParticipant(partyID);
+    const foundParty = await this.partyRepository.getPartyEntity(partyID);
 
     // 보고있던 그룹이 삭제된 경우
-    if (!participantList) {
+    if (!foundParty) {
       throw ErrorGenerator.notFound();
     }
+
+    // 모집 완료
+    if (foundParty.numberOfRecruit <= foundParty.numberOfParticipant) {
+      return 'EndOfRecruit';
+    }
+
+    const participantList = await this.partyRepository.getParticipant(partyID);
 
     const isParticipant = participantList.find((participant) => {
       return participant.userID === userID;
@@ -161,7 +173,7 @@ export default class PartyService implements IPartyService {
     }
 
     const participant = await this.partyRepository.insertParticipant(userID, partyID, false);
-    await this.partyRepository.updateParticipantCount(partyID);
+    await this.partyRepository.increaseParticipantCount(partyID);
     return participant;
   };
 
@@ -197,6 +209,7 @@ export default class PartyService implements IPartyService {
     });
   };
 
+  // TODO: send email to owner
   public getOpenCharNotification = async (userID: number) => {
     const foundNotificationList = await this.partyRepository.getNotificationOpenChatList(userID);
     return foundNotificationList.map((noti) => {
@@ -215,5 +228,17 @@ export default class PartyService implements IPartyService {
         },
       };
     });
+  };
+
+  public cancelJoin = async (userID: number, partyID: string) => {
+    const foundParticipant = await this.partyRepository.getParticipantEntity({ userID, partyID });
+    if (!foundParticipant) throw ErrorGenerator.badRequest('DoesNotExistParticipant');
+    // delete participant
+    await Promise.all([
+      this.partyRepository.decreaseParticipantCount(partyID),
+      this.partyRepository.deleteNotificationOpenChat({ partyID }),
+    ]);
+    await this.partyRepository.deleteParticipantEntity({ userID, partyID });
+    return 'Success';
   };
 }

@@ -130,12 +130,21 @@ export const getParticipatePartyListQuery: IJoinQuery<PartyEntity, ParticipantEn
   `,
 };
 
-export const updateNumberOfParticipantCountQuery: IQuery<PartyEntity> = {
+export const increaseCountOfParticipantQuery: IQuery<PartyEntity> = {
   param: [{ name: 'id' }],
   query: `
     UPDATE party
     SET numberOfParticipant = numberOfParticipant + 1
     WHERE id=?`,
+};
+
+export const decreaseCountOfParticipantQuery: IQuery<PartyEntity> = {
+  param: [{ name: 'id' }],
+  query: `
+    UPDATE party
+    SET numberOfParticipant = numberOfParticipant - 1
+    WHERE id=?
+  `,
 };
 
 export const getNotificationOpenChatListQuery: IQuery<NotificationOpenChatEntity> = {

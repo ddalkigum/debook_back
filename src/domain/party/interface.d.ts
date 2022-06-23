@@ -135,6 +135,7 @@ export interface IPartyService {
   searchBook: (title: string, page: number) => Promise<SearchBook>;
   registNotification: (userID: number, partyID: string) => Promise<InsertResult<NotificationOpenChatEntity>>;
   getOpenCharNotification: (userID: number) => Promise<OpenChatResult[]>;
+  cancelJoin: (userID: number, partyID: string) => Promise<string>;
 }
 
 export interface IPartyRepository {
@@ -151,11 +152,15 @@ export interface IPartyRepository {
 
   insertParticipant: (userID: number, partyID: string, isOwner: boolean) => Promise<Partial<ParticipantEntity>>;
   getParticipant: (partyID: string) => Promise<ParticipantEntity[]>;
-  updateParticipantCount: (partyID: string) => Promise<Partial<PartyEntity>>;
+  getParticipantEntity: (findCondition: Partial<ParticipantEntity>) => Promise<ParticipantEntity>;
+  deleteParticipantEntity: (findCondition: Partial<ParticipantEntity>) => Promise<void>;
+  increaseParticipantCount: (partyID: string) => Promise<Partial<PartyEntity>>;
+  decreaseParticipantCount: (partyID: string) => Promise<Partial<PartyEntity>>;
 
   insertBook: (context: BookContext) => Promise<BookContext>;
   getBook: (bookID: string) => Promise<Partial<BookEntity>>;
 
   insertNotificationOpenChat: (context: InsertNotificationContext) => Promise<InsertResult<NotificationOpenChatEntity>>;
   getNotificationOpenChatList: (userID: number) => Promise<GetOpenChatList[]>;
+  deleteNotificationOpenChat: (findCondition: Partial<NotificationOpenChatEntity>) => Promise<void>;
 }

@@ -47,6 +47,23 @@ export default class PartyRouter implements IHttpRouter {
       });
     });
 
+    this.router.delete(
+      '/participate/:partyID',
+      this.middleware.authorization,
+      async (request: Request, response: Response, next: NextFunction) => {
+        this.apiResponse.generateResponse(request, response, next, async () => {
+          const { partyID } = request.params;
+          const { userID } = request.body;
+          const schema = Joi.object({
+            partyID: Joi.string().required(),
+            userID: Joi.number().required(),
+          });
+          validateContext({ partyID, userID }, schema);
+          return await this.partyService.cancelJoin(userID, partyID);
+        });
+      }
+    );
+
     this.router.post(
       '/join',
       this.middleware.authorization,
