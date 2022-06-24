@@ -35,16 +35,15 @@ export default class ImageRouter implements IHttpRouter {
           const s3 = this.s3Client.get();
           console.log(request.file);
           const { filename, mimetype } = request.file;
+          const imageFileExtention = filename.split('/')[1];
           const imageFile = fs.readFileSync(`image/${filename}`);
           const { user, type } = request.body;
-          console.log(user);
-          console.log(typeof user);
           const parsedUser = JSON.parse(user);
           const fileID = util.uuid.generageUUID();
           const upload: any = s3.upload(
             {
               Bucket: 'goback',
-              Key: `image/${type}/${parsedUser.nickname}/${fileID}`,
+              Key: `image/${type}/${parsedUser.nickname}/${fileID}.${imageFileExtention}`,
               Body: imageFile,
               ContentType: mimetype,
             },
