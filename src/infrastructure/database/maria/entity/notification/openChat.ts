@@ -9,7 +9,7 @@ export default class NotificationOpenChatEntity extends DateTimeEntity {
   @PrimaryColumn({ type: 'varchar', length: 36 })
   id: string;
 
-  @ManyToOne(() => UserEntity, (user) => user.id, { cascade: true })
+  @ManyToOne(() => UserEntity, (user) => user.id, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'userID' })
   userID: number;
 

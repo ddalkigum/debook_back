@@ -15,11 +15,11 @@ export default class ParticipantEntity extends DateTimeEntity {
   @Column({ type: 'boolean', default: false })
   isAccept: boolean;
 
-  @ManyToOne(() => UserEntity, (user) => user.id, { cascade: true })
+  @ManyToOne(() => UserEntity, (user) => user.id, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'userID' })
   userID: number;
 
-  @ManyToOne(() => PartyEntity, (party) => party.id, { cascade: true })
+  @ManyToOne(() => PartyEntity, (party) => party.id, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'partyID' })
   partyID: string;
 }

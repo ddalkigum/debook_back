@@ -12,7 +12,7 @@ export default class AvailableDayEntity {
   @JoinColumn({ name: 'dayID' })
   dayID: string;
 
-  @ManyToOne(() => PartyEntity, (party) => party.id, { cascade: true })
+  @ManyToOne(() => PartyEntity, (party) => party.id, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'partyID' })
   partyID: string;
 }

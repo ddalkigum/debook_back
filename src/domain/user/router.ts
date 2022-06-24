@@ -72,6 +72,22 @@ export default class UserRouter implements IHttpRouter {
         });
       }
     );
+
+    this.router.delete(
+      '',
+      // this.middleware.authorization,
+      async (request: Request, response: Response, next: NextFunction) => {
+        this.apiResponse.generateResponse(request, response, next, async () => {
+          const { userID } = request.body;
+          const schema = Joi.number().required();
+
+          validateContext(userID, schema);
+          await this.userService.deactivate(userID);
+          response.clearCookie('accessToken');
+          response.clearCookie('refreshToken');
+        });
+      }
+    );
   };
 
   public get = () => {

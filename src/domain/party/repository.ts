@@ -10,9 +10,9 @@ import {
   BookContext,
   IPartyRepository,
   InsertParty,
-  Day,
   InsertAvailableDay,
   InsertNotificationContext,
+  RegistPartyContext,
 } from './interface';
 import {
   getAvailableDayQuery,
@@ -23,6 +23,7 @@ import {
   getNotificationOpenChatListQuery,
   increaseCountOfParticipantQuery,
   decreaseCountOfParticipantQuery,
+  getModifyPartyQuery,
 } from './query';
 import ParticipantEntity from '../../infrastructure/database/maria/entity/party/participant';
 import NotificationOpenChatEntity from '../../infrastructure/database/maria/entity/notification/openChat';
@@ -38,9 +39,19 @@ export default class PartyRepository implements IPartyRepository {
     return await this.mariaDB.insert<PartyEntity>(Constants.PARTY_TABLE, { ...context, numberOfParticipant: 1 });
   };
 
+  public updateParty = async (partyID: string, context: RegistPartyContext) => {
+    this.logger.debug(`PartyRepository, updateParty, context: ${JSON.stringify(context)}`);
+    return await this.mariaDB.updateByColumn<PartyEntity>(Constants.PARTY_TABLE, { id: partyID }, context);
+  };
+
   public getPartyEntity = async (partyID: string) => {
     this.logger.debug(`PartyRepository, getPartyEntity, partyID: ${partyID}`);
     return await this.mariaDB.findbyID<PartyEntity>(Constants.PARTY_TABLE, partyID);
+  };
+
+  public getModifyParty = async (partyID: string) => {
+    this.logger.debug(`PartyRepository, getModifyParty, partyID: ${partyID}`);
+    return await this.mariaDB.executeQuery(getModifyPartyQuery.query, [partyID]);
   };
 
   public getPartyList = async () => {
@@ -113,6 +124,17 @@ export default class PartyRepository implements IPartyRepository {
   public insertAvailableDay = async (availableDayList: InsertAvailableDay[]) => {
     this.logger.debug(`PartyRepository, insertAvailableDay, availableDayList: ${JSON.stringify(availableDayList)}`);
     return await this.mariaDB.insertBulk<AvailableDayEntity>(Constants.AVAILABLE_DAY_TABLE, availableDayList);
+  };
+
+  public updateAvailableDay = async (partyID: string, updateCondition: Partial<AvailableDayEntity>) => {
+    this.logger.debug(
+      `PartyRepository, updateAvailableDay, partyID: ${partyID}, updateCondition: ${JSON.stringify(updateCondition)}`
+    );
+    return await this.mariaDB.updateByColumn<AvailableDayEntity>(
+      Constants.AVAILABLE_DAY_TABLE,
+      { partyID },
+      updateCondition
+    );
   };
 
   public getAvailableDay = async (partyID: string) => {

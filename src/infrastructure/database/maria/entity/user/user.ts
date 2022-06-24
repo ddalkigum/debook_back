@@ -1,6 +1,7 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Constants } from '../../../../../constants';
 import { DateTimeEntity } from '../datetime';
+import PartyEntity from '../party/party';
 
 @Entity({ name: Constants.USER_TABLE })
 export default class UserEntity extends DateTimeEntity {

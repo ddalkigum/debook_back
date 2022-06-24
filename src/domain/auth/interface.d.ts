@@ -38,5 +38,5 @@ export interface IAuthRepository {
   insertToken: (userID: number, tokenID: string, tokenSet: TokenSet) => Promise<Partial<TokenEntity>>;
   getTokenByID: (id: string) => Promise<TokenEntity>;
   getTokenByUserID: (userID: number) => Promise<TokenEntity>;
-  deleteToken: (accessToken: string) => Promise<any>;
+  deleteToken: (userID: number) => Promise<any>;
 }
