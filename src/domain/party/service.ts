@@ -130,7 +130,7 @@ export default class PartyService implements IPartyService {
     const convertedTitle = party.title.replace(/\?/g, '').replace(/ /g, '-');
     party.slug = convertedTitle;
 
-    if (foundParty) {
+    if (foundParty && foundParty.length > 0) {
       const slug = util.hex.generateURLSlug();
       party.slug = `${convertedTitle}-${slug}`;
     }
