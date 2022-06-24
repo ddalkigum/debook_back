@@ -64,8 +64,8 @@ export default class AuthRepository implements IAuthRepository {
     return await this.mariaDB.findByUniqueColumn<TokenEntity>(Constants.TOKEN_TABLE, { userID });
   };
 
-  public deleteToken = async (accessToken: string) => {
-    this.logger.debug(`AuthRepository, deleteToken, accessToken: ${accessToken}`);
-    return await this.mariaDB.deleteByColumn<TokenEntity>(Constants.TOKEN_TABLE, { accessToken });
+  public deleteToken = async (userID: number) => {
+    this.logger.debug(`AuthRepository, deleteToken, userID: ${userID}`);
+    return await this.mariaDB.deleteByColumn<TokenEntity>(Constants.TOKEN_TABLE, { userID });
   };
 }

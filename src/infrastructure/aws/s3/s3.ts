@@ -11,6 +11,21 @@ export default class S3Client implements IS3Client {
     region: config.awsConfig.region,
   });
 
+  public deleteContent = (nickname: string) => {
+    this.s3.deleteObjects(
+      {
+        Bucket: config.awsConfig.bucketName,
+        Delete: {
+          Objects: [{ Key: `image/profile/${nickname}/` }],
+        },
+      },
+      (error, data) => {
+        if (error) console.log(error);
+        console.log(data);
+      }
+    );
+  };
+
   public get = () => {
     return this.s3;
   };

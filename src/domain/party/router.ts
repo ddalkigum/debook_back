@@ -23,7 +23,7 @@ export default class PartyRouter implements IHttpRouter {
       this.apiResponse.generateResponse(request, response, next, async () => {
         const { title, page } = request.query;
         const schema = Joi.object({
-          title: Joi.string().min(3).max(20).required(),
+          title: Joi.string().min(2).max(20).required(),
           page: Joi.number().required(),
         });
         validateContext({ title, page }, schema);
@@ -31,12 +31,21 @@ export default class PartyRouter implements IHttpRouter {
       });
     });
 
-    // Get main card list
-    this.router.get('/recent', async (request: Request, response: Response, next: NextFunction) => {
-      this.apiResponse.generateResponse(request, response, next, async () => {
-        return await this.partyService.getMainCardList();
-      });
-    });
+    this.router.post(
+      '/join',
+      this.middleware.authorization,
+      async (request: Request, response: Response, next: NextFunction) => {
+        this.apiResponse.generateResponse(request, response, next, async () => {
+          const { userID, partyID } = request.body;
+          const schema = Joi.object({
+            userID: Joi.number().required(),
+            partyID: Joi.string().uuid().required(),
+          });
+          validateContext(request.body, schema);
+          return await this.partyService.joinParty(userID, partyID);
+        });
+      }
+    );
 
     this.router.get('/participate/:userID', async (request: Request, response: Response, next: NextFunction) => {
       this.apiResponse.generateResponse(request, response, next, async () => {
@@ -64,18 +73,27 @@ export default class PartyRouter implements IHttpRouter {
       }
     );
 
-    this.router.post(
-      '/join',
+    // Get main card list
+    this.router.get('/recent', async (request: Request, response: Response, next: NextFunction) => {
+      this.apiResponse.generateResponse(request, response, next, async () => {
+        return await this.partyService.getMainCardList();
+      });
+    });
+
+    this.router.get(
+      '/modify',
       this.middleware.authorization,
       async (request: Request, response: Response, next: NextFunction) => {
         this.apiResponse.generateResponse(request, response, next, async () => {
-          const { userID, partyID } = request.body;
+          const { userID } = request.body;
+          const { id } = request.query;
           const schema = Joi.object({
             userID: Joi.number().required(),
-            partyID: Joi.string().uuid().required(),
+            id: Joi.string().uuid().required(),
           });
-          validateContext(request.body, schema);
-          return await this.partyService.joinParty(userID, partyID);
+
+          validateContext({ userID, id }, schema);
+          return await this.partyService.getModifyParty(userID, id as string);
         });
       }
     );
@@ -153,6 +171,41 @@ export default class PartyRouter implements IHttpRouter {
           });
           validateContext(request.body, schema);
           await this.partyService.registParty({ party, book, ownerID: userID, availableDay });
+        });
+      }
+    );
+
+    this.router.patch(
+      '/update',
+      this.middleware.authorization,
+      async (request: Request, response: Response, next: NextFunction) => {
+        this.apiResponse.generateResponse(request, response, next, async () => {
+          const { partyID, party, book, userID, availableDay } = request.body;
+          console.log(request.body);
+          const schema = Joi.object({
+            partyID: Joi.string().uuid().required(),
+            party: Joi.object({
+              title: Joi.string().min(3).max(20).required(),
+              numberOfRecruit: Joi.number().min(2).max(6),
+              openChatURL: Joi.string().required(),
+              openChatPassword: Joi.string().optional(),
+              region: Joi.string().optional(),
+              city: Joi.string().optional(),
+              town: Joi.string().optional(),
+              isOnline: Joi.number().required(),
+              description: Joi.string().required(),
+            }),
+            book: Joi.object({
+              id: Joi.string().required(),
+              title: Joi.string().required(),
+              authors: Joi.array().required(),
+              thumbnail: Joi.string().optional(),
+            }),
+            userID: Joi.number().required(),
+            availableDay: Joi.array().required(),
+          });
+          validateContext(request.body, schema);
+          await this.partyService.updateParty(partyID, { party, book, ownerID: userID, availableDay });
         });
       }
     );

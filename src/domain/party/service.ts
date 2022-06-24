@@ -99,6 +99,58 @@ export default class PartyService implements IPartyService {
     };
   };
 
+  public getModifyParty = async (userID: number, partyID: string) => {
+    this.logger.debug(`PartyService, getModifyParty`);
+    const foundPartyList = await this.partyRepository.getModifyParty(partyID);
+    const foundParty = foundPartyList[0];
+
+    if (!foundParty) throw ErrorGenerator.notFound();
+    if (foundParty.ownerID !== userID) throw ErrorGenerator.notFound();
+
+    const foundAvailableDayList = await this.partyRepository.getAvailableDay(partyID);
+    const availableDayList = foundAvailableDayList.map((availableDay) => {
+      return availableDay.dayID;
+    });
+
+    const {
+      partyTitle,
+      numberOfRecruit,
+      openChatURL,
+      openChatPassword,
+      isOnline,
+      region,
+      city,
+      town,
+      description,
+      bookID,
+      bookTitle,
+      bookThumbnail,
+      authors,
+    } = foundParty;
+
+    return {
+      party: {
+        id: foundParty.partyID,
+        title: partyTitle,
+        numberOfRecruit,
+        openChatURL,
+        openChatPassword,
+        isOnline,
+        region,
+        city,
+        town,
+        description,
+      },
+      book: {
+        id: bookID,
+        title: bookTitle,
+        thumbnail: bookThumbnail,
+        authors,
+      },
+      availableDayList,
+    };
+  };
+
   public getRelationPartyList = async (bookID: string) => {
     const partyList = await this.partyRepository.getPartyListByBookID(bookID);
 
@@ -148,8 +200,21 @@ export default class PartyService implements IPartyService {
     return context;
   };
 
+  public updateParty = async (partyID: string, context: RegistPartyContext) => {
+    this.logger.debug(`PartyService, updateParty`);
+    // availableDay update
+    await Promise.all(
+      context.availableDay.map((day) => {
+        this.partyRepository.updateAvailableDay(partyID, { dayID: day });
+      })
+    );
+    // party update
+    await this.partyRepository.updateParty(partyID, { ...context.party, bookID: context.book.id });
+    return 'Success';
+  };
+
   public joinParty = async (userID: number, partyID: string) => {
-    this.logger.debug(`PartyService, registParticipate, userID: ${userID}, partyID: ${partyID}`);
+    this.logger.debug(`PartyService, registParticipate`);
     const foundParty = await this.partyRepository.getPartyEntity(partyID);
 
     // 보고있던 그룹이 삭제된 경우

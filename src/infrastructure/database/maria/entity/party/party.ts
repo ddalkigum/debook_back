@@ -42,7 +42,7 @@ export default class PartyEntity extends DateTimeEntity {
   @Column({ type: 'text' })
   description: string;
 
-  @ManyToOne(() => UserEntity, (user) => user.id, { cascade: true })
+  @ManyToOne(() => UserEntity, (user) => user.id, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'ownerID' })
   ownerID: number;
 

@@ -164,3 +164,28 @@ export const getNotificationOpenChatListQuery: IQuery<NotificationOpenChatEntity
   WHERE userID=?
   `,
 };
+
+export const getModifyPartyQuery: IQuery<PartyEntity> = {
+  param: [{ name: 'id' }],
+  query: `
+    SELECT
+      party.id as partyID,
+      party.title as partyTitle,
+      party.numberOfRecruit,
+      party.openChatURL,
+      party.openChatPassword,
+      party.isOnline,
+      party.region,
+      party.city,
+      party.town,
+      party.ownerID,
+      party.description,
+      book.id as bookID,
+      book.title as bookTitle,
+      book.thumbnail as bookThumbnail,
+      book.authors
+    FROM party
+    JOIN book ON book.id = party.bookID
+    WHERE party.id=? 
+  `,
+};
