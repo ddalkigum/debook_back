@@ -34,7 +34,7 @@ export const getAuthEmailTemplate = (
               text-align: center;
               font-size: 1rem;
               padding: 1rem 0;
-              background: #62493a;
+              background: #009AFE;
               color: whitesmoke;
               font-weight: bold;
               cursor: pointer;

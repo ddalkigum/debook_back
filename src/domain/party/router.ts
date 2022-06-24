@@ -47,6 +47,23 @@ export default class PartyRouter implements IHttpRouter {
       });
     });
 
+    this.router.delete(
+      '/participate/:partyID',
+      this.middleware.authorization,
+      async (request: Request, response: Response, next: NextFunction) => {
+        this.apiResponse.generateResponse(request, response, next, async () => {
+          const { partyID } = request.params;
+          const { userID } = request.body;
+          const schema = Joi.object({
+            partyID: Joi.string().required(),
+            userID: Joi.number().required(),
+          });
+          validateContext({ partyID, userID }, schema);
+          return await this.partyService.cancelJoin(userID, partyID);
+        });
+      }
+    );
+
     this.router.post(
       '/join',
       this.middleware.authorization,
@@ -59,6 +76,39 @@ export default class PartyRouter implements IHttpRouter {
           });
           validateContext(request.body, schema);
           return await this.partyService.joinParty(userID, partyID);
+        });
+      }
+    );
+
+    this.router.post(
+      '/notification',
+      this.middleware.authorization,
+      async (request: Request, response: Response, next: NextFunction) => {
+        this.apiResponse.generateResponse(request, response, next, async () => {
+          const { userID, partyID } = request.body;
+          const schema = Joi.object({
+            userID: Joi.number().required(),
+            partyID: Joi.string().required(),
+          });
+
+          validateContext(request.body, schema);
+          return await this.partyService.registNotification(userID, partyID);
+        });
+      }
+    );
+
+    this.router.get(
+      '/notification',
+      this.middleware.authorization,
+      async (request: Request, response: Response, next: NextFunction) => {
+        this.apiResponse.generateResponse(request, response, next, async () => {
+          const { userID } = request.body;
+          const schema = Joi.object({
+            userID: Joi.number().required(),
+          });
+          validateContext(request.body, schema);
+
+          return await this.partyService.getOpenCharNotification(userID);
         });
       }
     );
@@ -84,8 +134,8 @@ export default class PartyRouter implements IHttpRouter {
             party: Joi.object({
               title: Joi.string().min(3).max(20).required(),
               numberOfRecruit: Joi.number().min(2).max(6),
-              kakaoOpenChatLink: Joi.string().required(),
-              kakaoOpenChatPassword: Joi.string().optional(),
+              openChatURL: Joi.string().required(),
+              openChatPassword: Joi.string().optional(),
               region: Joi.string().optional(),
               city: Joi.string().optional(),
               town: Joi.string().optional(),

@@ -22,10 +22,10 @@ export default class PartyEntity extends DateTimeEntity {
   numberOfParticipant: number;
 
   @Column({ type: 'varchar' })
-  kakaoOpenChatLink: string;
+  openChatURL: string;
 
   @Column({ type: 'varchar' })
-  kakaoOpenChatPassword: string;
+  openChatPassword: string;
 
   @Column({ type: 'boolean' })
   isOnline: boolean;

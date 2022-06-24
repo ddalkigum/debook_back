@@ -1,5 +1,6 @@
 import { inject, injectable } from 'inversify';
 import ErrorGenerator from '../../common/error';
+import UserEntity from '../../infrastructure/database/maria/entity/user/user';
 import { IWinstonLogger } from '../../infrastructure/logger/interface';
 import { TYPES } from '../../type';
 import { IUserRepository, IUserService } from './interface';
@@ -25,6 +26,11 @@ export default class UserService implements IUserService {
     }
 
     return foundUser;
+  };
+
+  public updateUser = async (userID: number, updateCondition: Partial<UserEntity>) => {
+    this.logger.debug(`UserService, updateUser`);
+    return await this.userRepository.updateUser(userID, updateCondition);
   };
 
   public secession = async (userID: number, nickname: string) => {

@@ -1,3 +1,4 @@
+import NotificationOpenChatEntity from '../../infrastructure/database/maria/entity/notification/openChat';
 import ParticipantEntity from '../../infrastructure/database/maria/entity/party/participant';
 import PartyEntity from '../../infrastructure/database/maria/entity/party/party';
 import UserEntity from '../../infrastructure/database/maria/entity/user/user';
@@ -129,10 +130,37 @@ export const getParticipatePartyListQuery: IJoinQuery<PartyEntity, ParticipantEn
   `,
 };
 
-export const updateNumberOfParticipantCountQuery: IQuery<PartyEntity> = {
+export const increaseCountOfParticipantQuery: IQuery<PartyEntity> = {
   param: [{ name: 'id' }],
   query: `
     UPDATE party
     SET numberOfParticipant = numberOfParticipant + 1
     WHERE id=?`,
+};
+
+export const decreaseCountOfParticipantQuery: IQuery<PartyEntity> = {
+  param: [{ name: 'id' }],
+  query: `
+    UPDATE party
+    SET numberOfParticipant = numberOfParticipant - 1
+    WHERE id=?
+  `,
+};
+
+export const getNotificationOpenChatListQuery: IQuery<NotificationOpenChatEntity> = {
+  param: [{ name: 'userID' }],
+  query: `
+  SELECT 
+	  openChat.id as notificationID,
+    party.id as partyID,
+    party.title,
+    party.openChatURL,
+    party.openChatPassword,
+    book.id as bookID,
+    book.thumbnail
+  FROM openChat
+  JOIN party ON party.id = openChat.partyID
+  JOIN book ON book.id = party.bookID
+  WHERE userID=?
+  `,
 };

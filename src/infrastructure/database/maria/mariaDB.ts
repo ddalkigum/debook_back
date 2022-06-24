@@ -6,7 +6,7 @@ import { TYPES } from '../../../type';
 import { IWinstonLogger } from '../../logger/interface';
 import * as Entity from './entity';
 import { DateTimeEntity } from './entity/datetime';
-import { IMariaDB, InsertRowsWithoutID, InsertRows } from './interface';
+import { IMariaDB, InsertRowsWithoutID, InsertRows, IEntity } from './interface';
 import { dataSource } from './ormConfig';
 
 const getEntity = <T>(tableName: Constants): EntityTarget<T> => {
@@ -34,6 +34,9 @@ const getEntity = <T>(tableName: Constants): EntityTarget<T> => {
 
     case Constants.BOOK_TABLE:
       return Entity.Book;
+
+    case Constants.NOTIFICATION_OPEN_CHAT_TABLE:
+      return Entity.OpenChat;
   }
 };
 
@@ -88,7 +91,10 @@ export default class MariaDB implements IMariaDB {
     }
   };
 
-  public insertWithoutID = async <T>(tableName: Constants, rows: InsertRowsWithoutID<T>) => {
+  public insertWithoutID = async <T extends IEntity>(
+    tableName: Constants,
+    rows: InsertRowsWithoutID<T>
+  ): Promise<InsertRows<T>> => {
     const queryRunner = this.connection.createQueryRunner();
     try {
       const EntityClass = getEntity<T>(tableName);
@@ -100,13 +106,13 @@ export default class MariaDB implements IMariaDB {
         .values((rows as unknown) as QueryDeepPartialEntity<T>)
         .execute();
 
-      return { id: result.identifiers[0].id, ...rows };
+      return { id: result.identifiers[0].id, ...rows } as InsertRows<T>;
     } finally {
       await queryRunner.release();
     }
   };
 
-  public insertBulk = async <T>(tableName: Constants, rows: InsertRows<T>[]) => {
+  public insertBulk = async <T>(tableName: Constants, rows: InsertRowsWithoutID<T>[]) => {
     const queryRunner = this.connection.createQueryRunner();
     try {
       const EntityClass = getEntity<T>(tableName);

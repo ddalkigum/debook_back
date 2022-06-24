@@ -6,6 +6,8 @@ import { TYPES } from '../../type';
 import { IHttpRouter } from '../interface';
 import { IUserService } from './interface';
 import * as util from '../../util';
+import Joi from 'joi';
+import { validateContext } from '../../util/validate';
 
 @injectable()
 export default class UserRouter implements IHttpRouter {
@@ -35,13 +37,41 @@ export default class UserRouter implements IHttpRouter {
       });
     });
 
-    this.router.get('/profile/:nickname', async (request: Request, response: Response, next: NextFunction) => {
-      this.apiResponse.generateResponse(request, response, next, async () => {
-        const { nickname } = request.params;
-        const user = this.userService.getUserProfile({ nickname });
-        return user;
-      });
-    });
+    this.router.get(
+      '/profile/:nickname',
+      this.middleware.authorization,
+      async (request: Request, response: Response, next: NextFunction) => {
+        this.apiResponse.generateResponse(request, response, next, async () => {
+          const { nickname } = request.params;
+          const schema = Joi.object({
+            nickname: Joi.string().required(),
+          });
+
+          validateContext(request.params, schema);
+          const user = this.userService.getUserProfile({ nickname });
+          return user;
+        });
+      }
+    );
+
+    this.router.patch(
+      '/profile',
+      this.middleware.authorization,
+      async (request: Request, response: Response, next: NextFunction) => {
+        this.apiResponse.generateResponse(request, response, next, async () => {
+          const { userID, profileImage } = request.body;
+          const regex = /https:\/\/cdn.debook.me/;
+          const schema = Joi.object({
+            userID: Joi.number().required(),
+            profileImage: Joi.string().regex(regex).required(),
+          });
+
+          validateContext(request.body, schema);
+          const user = this.userService.updateUser(userID, { profileImage });
+          return user;
+        });
+      }
+    );
   };
 
   public get = () => {

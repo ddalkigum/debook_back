@@ -33,16 +33,20 @@ export default class ImageRouter implements IHttpRouter {
       async (request: Request, response: Response, next: NextFunction) => {
         await this.apiResponse.generateResponse(request, response, next, async () => {
           const s3 = this.s3Client.get();
-          const imageFile = fs.readFileSync(`image/${request.file.filename}`);
-          const { nickname, type } = request.body;
-
+          console.log(request.file);
+          const { filename, mimetype } = request.file;
+          const imageFile = fs.readFileSync(`image/${filename}`);
+          const { user, type } = request.body;
+          console.log(user);
+          console.log(typeof user);
+          const parsedUser = JSON.parse(user);
           const fileID = util.uuid.generageUUID();
           const upload: any = s3.upload(
             {
               Bucket: 'goback',
-              Key: `image/${type}/${nickname}/${fileID}`,
+              Key: `image/${type}/${parsedUser.nickname}/${fileID}`,
               Body: imageFile,
-              ContentType: 'image/png',
+              ContentType: mimetype,
             },
             (error, data) => {
               if (error) {
@@ -54,7 +58,7 @@ export default class ImageRouter implements IHttpRouter {
           );
 
           const result = await Promise.resolve(upload);
-          const encodedNickname = encodeURIComponent(nickname);
+          const encodedNickname = encodeURIComponent(parsedUser.nickname);
           const imageURL = `https://cdn.debook.me/image/${type}/${encodedNickname}/${fileID}`;
           return imageURL;
         });

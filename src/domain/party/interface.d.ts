@@ -4,7 +4,9 @@ import BookEntity from '../../infrastructure/database/maria/entity/party/book';
 import ParticipantEntity from '../../infrastructure/database/maria/entity/party/participant';
 import PartyEntity from '../../infrastructure/database/maria/entity/party/party';
 import UserEntity from '../../infrastructure/database/maria/entity/user/user';
+import NotificationOpenChatEntity from '../../infrastructure/database/maria/entity/notification/openChat';
 import { IEntity, InsertRows } from '../../infrastructure/database/maria/interface';
+import { InsertResult } from 'typeorm';
 
 export interface KakakoBookInfo {
   authors: string[];
@@ -105,6 +107,24 @@ export interface PartyDetailResult {
   availableDay: AvailableDayEntity[];
 }
 
+export type InsertNotificationContext = Omit<NotificationOpenChatEntity, keyof DateTimeEntity>;
+
+interface GetOpenChatList {
+  notificationID: string;
+  partyID: string;
+  title: string;
+  openChatURL: string;
+  openChatPassword: string;
+  bookID: string;
+  thumbnail: string;
+}
+
+export interface OpenChatResult {
+  notification: { id: string };
+  party: Pick<PartyEntity, 'id' | 'title' | 'openChatURL' | 'openChatPassword'>;
+  book: Pick<BookEntity, 'id' | 'thumbnail'>;
+}
+
 export interface IPartyService {
   getMainCardList: () => Promise<GetPartyDetail[]>;
   getPartyDetail: (nickname: string, URLSlug: string, userID?: number) => Promise<any>;
@@ -113,20 +133,34 @@ export interface IPartyService {
   registParty: (context: RegistPartyContext) => Promise<PartyContext>;
   joinParty: (userID: number, partyID: string) => Promise<>;
   searchBook: (title: string, page: number) => Promise<SearchBook>;
+  registNotification: (userID: number, partyID: string) => Promise<InsertResult<NotificationOpenChatEntity>>;
+  getOpenCharNotification: (userID: number) => Promise<OpenChatResult[]>;
+  cancelJoin: (userID: number, partyID: string) => Promise<string>;
 }
 
 export interface IPartyRepository {
+  insertParty: (party: InsertParty) => Promise<InsertParty>;
+  getPartyEntity: (partyID: string) => Promise<PartyEntity>;
   getPartyList: () => Promise<GetPartyDetail[]>;
   getPartyDetail: (nickname: string, slug: string) => Promise<GetPartyDetail[]>;
   getPartyByTitle: (nickname: string, partyTitle: string) => Promise<PartyEntity[]>;
-  getAvailableDay: (partyID: string) => Promise<AvailableDayEntity[]>;
-  getParticipant: (partyID: string) => Promise<ParticipantEntity[]>;
   getPartyListByBookID: (bookID: string) => Promise<any>;
   getParticipateParty: (userID: number) => Promise<any[]>;
-  insertParty: (party: InsertParty) => Promise<InsertParty>;
+
+  insertAvailableDay: (availableDayList: InsertAvailableDay[]) => Promise<InsertAvailableDay[]>;
+  getAvailableDay: (partyID: string) => Promise<AvailableDayEntity[]>;
+
+  insertParticipant: (userID: number, partyID: string, isOwner: boolean) => Promise<Partial<ParticipantEntity>>;
+  getParticipant: (partyID: string) => Promise<ParticipantEntity[]>;
+  getParticipantEntity: (findCondition: Partial<ParticipantEntity>) => Promise<ParticipantEntity>;
+  deleteParticipantEntity: (findCondition: Partial<ParticipantEntity>) => Promise<void>;
+  increaseParticipantCount: (partyID: string) => Promise<Partial<PartyEntity>>;
+  decreaseParticipantCount: (partyID: string) => Promise<Partial<PartyEntity>>;
+
   insertBook: (context: BookContext) => Promise<BookContext>;
   getBook: (bookID: string) => Promise<Partial<BookEntity>>;
-  insertAvailableDay: (availableDayList: InsertAvailableDay[]) => Promise<InsertAvailableDay[]>;
-  insertParticipant: (userID: number, partyID: string, isOwner: boolean) => Promise<Partial<ParticipantEntity>>;
-  updateParticipantCount: (partyID: string) => Promise<Partial<PartyEntity>>;
+
+  insertNotificationOpenChat: (context: InsertNotificationContext) => Promise<InsertResult<NotificationOpenChatEntity>>;
+  getNotificationOpenChatList: (userID: number) => Promise<GetOpenChatList[]>;
+  deleteNotificationOpenChat: (findCondition: Partial<NotificationOpenChatEntity>) => Promise<void>;
 }
