@@ -37,22 +37,18 @@ export default class UserRouter implements IHttpRouter {
       });
     });
 
-    this.router.get(
-      '/profile/:nickname',
-      this.middleware.authorization,
-      async (request: Request, response: Response, next: NextFunction) => {
-        this.apiResponse.generateResponse(request, response, next, async () => {
-          const { nickname } = request.params;
-          const schema = Joi.object({
-            nickname: Joi.string().required(),
-          });
-
-          validateContext(request.params, schema);
-          const user = this.userService.getUserProfile({ nickname });
-          return user;
+    this.router.get('/profile/:nickname', async (request: Request, response: Response, next: NextFunction) => {
+      this.apiResponse.generateResponse(request, response, next, async () => {
+        const { nickname } = request.params;
+        const schema = Joi.object({
+          nickname: Joi.string().required(),
         });
-      }
-    );
+
+        validateContext(request.params, schema);
+        const user = this.userService.getUserProfile({ nickname });
+        return user;
+      });
+    });
 
     this.router.patch(
       '/profile',

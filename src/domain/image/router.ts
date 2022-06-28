@@ -36,7 +36,6 @@ export default class ImageRouter implements IHttpRouter {
           const { filename, mimetype } = request.file;
           const imageFileExtention = filename.split('/')[1];
           const imageFile = fs.readFileSync(`image/${filename}`);
-          console.log(request.body);
           const { user, type } = request.body;
           const parsedUser = JSON.parse(user);
           const fileID = util.uuid.generageUUID();

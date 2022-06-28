@@ -32,14 +32,11 @@ export default class AuthRepository implements IAuthRepository {
     return await this.mariaDB.deleteByColumn<CertificationEntity>(Constants.CERTIFICATION_TABLE, { code });
   };
 
-  public updateToken = async (userID: number, tokenSet: TokenSet) => {
-    this.logger.debug(`AuthRepository, updateToken, userID: ${userID}, tokenSet: ${JSON.stringify(tokenSet)}`);
-    const { accessToken, refreshToken } = tokenSet;
-    return await this.mariaDB.updateByColumn<TokenEntity>(
-      Constants.TOKEN_TABLE,
-      { userID },
-      { accessToken, refreshToken }
+  public updateToken = async (userID: number, updateCondition: Partial<TokenEntity>) => {
+    this.logger.debug(
+      `AuthRepository, updateToken, userID: ${userID}, updateCondition: ${JSON.stringify(updateCondition)}`
     );
+    return await this.mariaDB.updateByColumn<TokenEntity>(Constants.TOKEN_TABLE, { userID }, updateCondition);
   };
 
   public insertToken = async (userID: number, tokenID: string, tokenSet: TokenSet) => {

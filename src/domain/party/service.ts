@@ -7,15 +7,19 @@ import { IUserRepository } from '../user/interface';
 import ErrorGenerator from '../../common/error';
 import * as util from '../../util';
 
+const ITEM_COUNT = 12;
+
 @injectable()
 export default class PartyService implements IPartyService {
   @inject(TYPES.WinstonLogger) private logger: IWinstonLogger;
   @inject(TYPES.Partyrepository) private partyRepository: IPartyRepository;
   @inject(TYPES.UserRepository) private userRepository: IUserRepository;
 
-  public getMainCardList = async () => {
+  public getMainCardList = async (page: number) => {
     this.logger.debug(`PartyService, getMainCardList`);
-    const partyList = await this.partyRepository.getPartyList();
+
+    const offset = page * ITEM_COUNT - ITEM_COUNT;
+    const partyList = await this.partyRepository.getPartyList(offset, ITEM_COUNT);
     return partyList;
   };
 
@@ -151,6 +155,15 @@ export default class PartyService implements IPartyService {
     };
   };
 
+  public deleteParty = async (partyID: string) => {
+    this.logger.debug(`PartyService, deleteParty`);
+    const foundParty = await this.partyRepository.getPartyEntity(partyID);
+    if (!foundParty) throw ErrorGenerator.badRequest('DoesNotExistParty');
+
+    await this.partyRepository.deleteParty(partyID);
+    return 'Success';
+  };
+
   public getRelationPartyList = async (bookID: string) => {
     const partyList = await this.partyRepository.getPartyListByBookID(bookID);
 
@@ -202,12 +215,20 @@ export default class PartyService implements IPartyService {
 
   public updateParty = async (partyID: string, context: RegistPartyContext) => {
     this.logger.debug(`PartyService, updateParty`);
-    // availableDay update
-    await Promise.all(
-      context.availableDay.map((day) => {
-        this.partyRepository.updateAvailableDay(partyID, { dayID: day });
-      })
-    );
+
+    // get available day
+    const availableDayList = await this.partyRepository.getAvailableDay(partyID);
+
+    if (availableDayList.length) {
+      await this.partyRepository.deleteAvailableDay(partyID);
+    }
+
+    const insertList = context.availableDay.map((day) => {
+      return { partyID, dayID: day };
+    });
+
+    await this.partyRepository.insertAvailableDay(insertList);
+
     // party update
     await this.partyRepository.updateParty(partyID, { ...context.party, bookID: context.book.id });
     return 'Success';
@@ -216,6 +237,7 @@ export default class PartyService implements IPartyService {
   public joinParty = async (userID: number, partyID: string) => {
     this.logger.debug(`PartyService, registParticipate`);
     const foundParty = await this.partyRepository.getPartyEntity(partyID);
+    const participantList = await this.partyRepository.getParticipant(partyID);
 
     // 보고있던 그룹이 삭제된 경우
     if (!foundParty) {
@@ -223,11 +245,9 @@ export default class PartyService implements IPartyService {
     }
 
     // 모집 완료
-    if (foundParty.numberOfRecruit <= foundParty.numberOfParticipant) {
+    if (foundParty.numberOfRecruit <= participantList.length) {
       return 'EndOfRecruit';
     }
-
-    const participantList = await this.partyRepository.getParticipant(partyID);
 
     const isParticipant = participantList.find((participant) => {
       return participant.userID === userID;
@@ -238,7 +258,6 @@ export default class PartyService implements IPartyService {
     }
 
     const participant = await this.partyRepository.insertParticipant(userID, partyID, false);
-    await this.partyRepository.increaseParticipantCount(partyID);
     return participant;
   };
 
@@ -299,11 +318,8 @@ export default class PartyService implements IPartyService {
     const foundParticipant = await this.partyRepository.getParticipantEntity({ userID, partyID });
     if (!foundParticipant) throw ErrorGenerator.badRequest('DoesNotExistParticipant');
     // delete participant
-    await Promise.all([
-      this.partyRepository.decreaseParticipantCount(partyID),
-      this.partyRepository.deleteNotificationOpenChat({ partyID }),
-    ]);
-    await this.partyRepository.deleteParticipantEntity({ userID, partyID });
+    await this.partyRepository.deleteNotificationOpenChat({ partyID }),
+      await this.partyRepository.deleteParticipantEntity({ userID, partyID });
     return 'Success';
   };
 }

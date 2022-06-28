@@ -4,7 +4,6 @@ import Joi from 'joi';
 import { IApiResponse } from '../../common/interface';
 import { IMiddleware } from '../../middleware/interface';
 import { TYPES } from '../../type';
-import { checkRequired } from '../../util';
 import { validateContext } from '../../util/validate';
 import { IHttpRouter } from '../interface';
 import { IPartyService } from './interface';
@@ -76,7 +75,8 @@ export default class PartyRouter implements IHttpRouter {
     // Get main card list
     this.router.get('/recent', async (request: Request, response: Response, next: NextFunction) => {
       this.apiResponse.generateResponse(request, response, next, async () => {
-        return await this.partyService.getMainCardList();
+        const { page } = request.query;
+        return await this.partyService.getMainCardList(Number(page));
       });
     });
 
@@ -151,7 +151,7 @@ export default class PartyRouter implements IHttpRouter {
           const schema = Joi.object({
             party: Joi.object({
               title: Joi.string().min(3).max(20).required(),
-              numberOfRecruit: Joi.number().min(2).max(6),
+              numberOfRecruit: Joi.number().min(2).max(12),
               openChatURL: Joi.string().required(),
               openChatPassword: Joi.string().optional(),
               region: Joi.string().optional(),
@@ -165,7 +165,7 @@ export default class PartyRouter implements IHttpRouter {
               title: Joi.string().required(),
               authors: Joi.array().required(),
               thumbnail: Joi.string().optional(),
-            }),
+            }).required(),
             userID: Joi.number().required(),
             availableDay: Joi.array().required(),
           });
@@ -186,7 +186,7 @@ export default class PartyRouter implements IHttpRouter {
             partyID: Joi.string().uuid().required(),
             party: Joi.object({
               title: Joi.string().min(3).max(20).required(),
-              numberOfRecruit: Joi.number().min(2).max(6),
+              numberOfRecruit: Joi.number().min(2).max(12),
               openChatURL: Joi.string().required(),
               openChatPassword: Joi.string().optional(),
               region: Joi.string().optional(),
@@ -225,6 +225,24 @@ export default class PartyRouter implements IHttpRouter {
           validateContext(request.params, schema);
 
           return await this.partyService.getPartyDetail(nickname, URLSlug, userID);
+        });
+      }
+    );
+
+    this.router.delete(
+      '',
+      this.middleware.authorization,
+      async (request: Request, response: Response, next: NextFunction) => {
+        this.apiResponse.generateResponse(request, response, next, async () => {
+          const partyID = request.query.id as string;
+          const { userID } = request.body;
+          const schema = Joi.object({
+            partyID: Joi.string().required(),
+            userID: Joi.number().required(),
+          });
+
+          validateContext({ partyID, userID }, schema);
+          return await this.partyService.deleteParty(partyID);
         });
       }
     );

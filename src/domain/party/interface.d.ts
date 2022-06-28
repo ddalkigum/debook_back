@@ -126,9 +126,10 @@ export interface OpenChatResult {
 }
 
 export interface IPartyService {
-  getMainCardList: () => Promise<GetPartyDetail[]>;
+  getMainCardList: (page: number) => Promise<GetPartyDetail[]>;
   getPartyDetail: (nickname: string, URLSlug: string, userID?: number) => Promise<any>;
   getModifyParty: (userID: number, partyID: string) => Promise<any>;
+  deleteParty: (partyID: string) => Promise<string>;
   getRelationPartyList: (bookID: string) => Promise<PartyDetailResult>;
   getParticipatePartyList: (userID: number) => Promise<any>;
   registParty: (context: RegistPartyContext) => Promise<PartyContext>;
@@ -143,9 +144,10 @@ export interface IPartyService {
 export interface IPartyRepository {
   insertParty: (party: InsertParty) => Promise<InsertParty>;
   updateParty: (partyID: string, context: Partial<PartyEntity>) => Promise<Partial<PartyEntity>>;
+  deleteParty: (partyID: string) => Promise<void>;
   getPartyEntity: (partyID: string) => Promise<PartyEntity>;
   getModifyParty: (partyID: string) => Promise<any>;
-  getPartyList: () => Promise<GetPartyDetail[]>;
+  getPartyList: (offset: number, limit: number) => Promise<GetPartyDetail[]>;
   getPartyDetail: (nickname: string, slug: string) => Promise<GetPartyDetail[]>;
   getPartyByTitle: (nickname: string, partyTitle: string) => Promise<PartyEntity[]>;
   getPartyListByBookID: (bookID: string) => Promise<any>;
@@ -156,14 +158,13 @@ export interface IPartyRepository {
     partyID: string,
     availableDay: Partial<AvailableDayEntity>
   ) => Promise<Partial<AvailableDayEntity>>;
+  deleteAvailableDay: (partyID: string) => Promise<void>;
   getAvailableDay: (partyID: string) => Promise<AvailableDayEntity[]>;
 
   insertParticipant: (userID: number, partyID: string, isOwner: boolean) => Promise<Partial<ParticipantEntity>>;
   getParticipant: (partyID: string) => Promise<ParticipantEntity[]>;
   getParticipantEntity: (findCondition: Partial<ParticipantEntity>) => Promise<ParticipantEntity>;
   deleteParticipantEntity: (findCondition: Partial<ParticipantEntity>) => Promise<void>;
-  increaseParticipantCount: (partyID: string) => Promise<Partial<PartyEntity>>;
-  decreaseParticipantCount: (partyID: string) => Promise<Partial<PartyEntity>>;
 
   insertBook: (context: BookContext) => Promise<BookContext>;
   getBook: (bookID: string) => Promise<Partial<BookEntity>>;

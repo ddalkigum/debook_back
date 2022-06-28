@@ -43,7 +43,6 @@ const onlineParty: InsertParty = {
   title: '제목제목',
   slug: undefined,
   numberOfRecruit: 4,
-  numberOfParticipant: 1,
   openChatURL: 'https://open.kakao.com/o/',
   openChatPassword: '1234',
   isOnline: true,

@@ -18,9 +18,6 @@ export default class PartyEntity extends DateTimeEntity {
   @Column({ type: 'tinyint' })
   numberOfRecruit: number;
 
-  @Column({ type: 'tinyint', default: 0 })
-  numberOfParticipant: number;
-
   @Column({ type: 'varchar' })
   openChatURL: string;
 

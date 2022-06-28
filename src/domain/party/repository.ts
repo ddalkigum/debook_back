@@ -21,8 +21,6 @@ import {
   getPartyListQuery,
   getParticipatePartyListQuery,
   getNotificationOpenChatListQuery,
-  increaseCountOfParticipantQuery,
-  decreaseCountOfParticipantQuery,
   getModifyPartyQuery,
 } from './query';
 import ParticipantEntity from '../../infrastructure/database/maria/entity/party/participant';
@@ -36,12 +34,17 @@ export default class PartyRepository implements IPartyRepository {
   // Party
   public insertParty = async (context: InsertParty): Promise<InsertParty> => {
     this.logger.debug(`PartyRepository, insertParty, context: ${JSON.stringify(context)}`);
-    return await this.mariaDB.insert<PartyEntity>(Constants.PARTY_TABLE, { ...context, numberOfParticipant: 1 });
+    return await this.mariaDB.insert<PartyEntity>(Constants.PARTY_TABLE, { ...context });
   };
 
   public updateParty = async (partyID: string, context: RegistPartyContext) => {
     this.logger.debug(`PartyRepository, updateParty, context: ${JSON.stringify(context)}`);
     return await this.mariaDB.updateByColumn<PartyEntity>(Constants.PARTY_TABLE, { id: partyID }, context);
+  };
+
+  public deleteParty = async (partyID: string) => {
+    this.logger.debug(`PartyRepository, deleteParty, partyID: ${partyID}`);
+    return await this.mariaDB.deleteByColumn<PartyEntity>(Constants.PARTY_TABLE, { id: partyID });
   };
 
   public getPartyEntity = async (partyID: string) => {
@@ -54,9 +57,9 @@ export default class PartyRepository implements IPartyRepository {
     return await this.mariaDB.executeQuery(getModifyPartyQuery.query, [partyID]);
   };
 
-  public getPartyList = async () => {
-    this.logger.debug(`PartyRepository, getPartyList`);
-    return await this.mariaDB.executeQuery(getPartyListQuery.query);
+  public getPartyList = async (offset: number, itemCount: number) => {
+    this.logger.debug(`PartyRepository, getPartyList, offset: ${offset}, itemCount: ${itemCount}`);
+    return await this.mariaDB.executeQuery(getPartyListQuery.query, [offset, itemCount]);
   };
 
   public getPartyDetail = async (nickname: string, partyTitle: string) => {
@@ -110,16 +113,6 @@ export default class PartyRepository implements IPartyRepository {
     return await this.mariaDB.deleteByColumn<ParticipantEntity>(Constants.PARTICIPANT_TABLE, findCondition);
   };
 
-  public increaseParticipantCount = async (partyID: string) => {
-    this.logger.debug(`PartyRepository, increaseParticipantCount, partyID: ${partyID}}`);
-    return await this.mariaDB.executeQuery(increaseCountOfParticipantQuery.query, [partyID]);
-  };
-
-  public decreaseParticipantCount = async (partyID: string) => {
-    this.logger.debug(`PartyRepository, decreaseParticipantCount, partyID: ${partyID}}`);
-    return await this.mariaDB.executeQuery(decreaseCountOfParticipantQuery.query, [partyID]);
-  };
-
   // AvailableDay
   public insertAvailableDay = async (availableDayList: InsertAvailableDay[]) => {
     this.logger.debug(`PartyRepository, insertAvailableDay, availableDayList: ${JSON.stringify(availableDayList)}`);
@@ -135,6 +128,11 @@ export default class PartyRepository implements IPartyRepository {
       { partyID },
       updateCondition
     );
+  };
+
+  public deleteAvailableDay = async (partyID: string) => {
+    this.logger.debug(`PartyRepository, deleteAvailableDay, partyID: ${partyID}`);
+    await this.mariaDB.deleteByColumn<AvailableDayEntity>(Constants.AVAILABLE_DAY_TABLE, { partyID });
   };
 
   public getAvailableDay = async (partyID: string) => {

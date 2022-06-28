@@ -76,11 +76,37 @@ export default class Middleware implements IMiddleware {
     }
   };
 
-  public checkLogin = (request: Request, response: Response, next: NextFunction) => {
+  public checkLogin = async (request: Request, response: Response, next: NextFunction) => {
     const { accessToken, refreshToken } = request.cookies;
-    if (!accessToken || !refreshToken) {
+    try {
+      if (!accessToken) {
+        // 로그인 안한 경우
+        if (!refreshToken) {
+          return next();
+        }
+
+        const { tokenID, userID } = verifyToken(refreshToken);
+        console.log(userID, tokenID);
+        const foundToken = await this.authRepository.getTokenByID(tokenID);
+
+        if (!foundToken) {
+          return next();
+        }
+
+        const newAccessToken = util.token.generateAccessToken({ userID }, config.authConfig.issuer);
+        await this.authRepository.updateToken(userID, { accessToken: newAccessToken });
+        request.body.userID = userID;
+        response.cookie('accessToken', newAccessToken, {
+          httpOnly: true,
+          maxAge: config.authConfig.maxAge.accessToken,
+        });
+        return next();
+      }
+
+      const { userID } = verifyToken(accessToken);
+      request.body.userID = userID;
       return next();
-    }
+    } catch (error) {}
 
     try {
       const { userID } = verifyToken(accessToken);

@@ -28,7 +28,6 @@ export const getPartyDetailQuery: IJoinQuery<PartyEntity, UserEntity> = {
     party.id as partyID, 
     party.title as partyTitle,
     party.numberOfRecruit,
-    party.numberOfParticipant,
     party.slug,
     party.isOnline,
     party.region,
@@ -42,7 +41,10 @@ export const getPartyDetailQuery: IJoinQuery<PartyEntity, UserEntity> = {
     book.id as bookID,
     book.title as bookTitle,
     book.thumbnail as bookThumbnail,
-    book.authors
+    book.authors,
+    (SELECT count(*) FROM participant 
+    WHERE partyID=party.id
+    ) as numberOfParticipant
   FROM party
   JOIN user ON user.id = party.ownerID
   JOIN book ON book.id = party.bookID
@@ -72,12 +74,12 @@ export const getAvailableDayQuery = {
 };
 
 export const getPartyListQuery = {
+  params: [{ name: 'offset' }, { name: 'count' }],
   query: `
   SELECT 
     party.id as partyID,
     party.title as partyTitle,
     party.numberOfRecruit,
-    party.numberOfParticipant,
     party.slug,
     party.isOnline,
     party.region,
@@ -90,11 +92,15 @@ export const getPartyListQuery = {
     book.id as bookID,
     book.title as bookTitle,
     book.thumbnail as bookThumbnail,
-    book.authors
+    book.authors,
+    (SELECT count(*) FROM participant 
+    WHERE partyID=party.id
+    ) as numberOfParticipant
   FROM party
   JOIN user ON user.id = party.ownerID
   JOIN book ON book.id = party.bookID
   ORDER BY party.createdAt DESC
+  LIMIT ?, ?
   `,
 };
 
@@ -105,7 +111,6 @@ export const getParticipatePartyListQuery: IJoinQuery<PartyEntity, ParticipantEn
     party.id as partyID,
     party.title as partyTitle,
     party.numberOfRecruit,
-    party.numberOfParticipant,
     party.ownerID,
     party.slug,
     party.isOnline,
@@ -120,30 +125,16 @@ export const getParticipatePartyListQuery: IJoinQuery<PartyEntity, ParticipantEn
     book.title as bookTitle,
     book.thumbnail as bookThumbnail,
     book.authors,
-    participant.isOwner
+    participant.isOwner,
+    (SELECT count(*) FROM participant 
+    WHERE partyID=party.id
+    ) as numberOfParticipant
   FROM party
   JOIN user ON user.id = party.ownerID
   JOIN book ON book.id = party.bookID
   JOIN participant ON participant.partyID = party.id
   WHERE participant.userID = ?
   ORDER BY participant.createdAt DESC;
-  `,
-};
-
-export const increaseCountOfParticipantQuery: IQuery<PartyEntity> = {
-  param: [{ name: 'id' }],
-  query: `
-    UPDATE party
-    SET numberOfParticipant = numberOfParticipant + 1
-    WHERE id=?`,
-};
-
-export const decreaseCountOfParticipantQuery: IQuery<PartyEntity> = {
-  param: [{ name: 'id' }],
-  query: `
-    UPDATE party
-    SET numberOfParticipant = numberOfParticipant - 1
-    WHERE id=?
   `,
 };
 
