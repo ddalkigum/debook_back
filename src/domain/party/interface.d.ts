@@ -147,7 +147,7 @@ export interface IPartyRepository {
   deleteParty: (partyID: string) => Promise<void>;
   getPartyEntity: (partyID: string) => Promise<PartyEntity>;
   getModifyParty: (partyID: string) => Promise<any>;
-  getPartyList: (offset: number, limit: number) => Promise<GetPartyDetail[]>;
+  getPartyList: (offset: number, itemCount: number) => Promise<GetPartyDetail[]>;
   getPartyDetail: (nickname: string, slug: string) => Promise<GetPartyDetail[]>;
   getPartyByTitle: (nickname: string, partyTitle: string) => Promise<PartyEntity[]>;
   getPartyListByBookID: (bookID: string) => Promise<any>;

@@ -77,7 +77,7 @@ describe('Party test', () => {
   });
 
   test('GetPartyList, Should return party list', async () => {
-    const partyList = await partyRepository.getPartyList();
+    const partyList = await partyRepository.getPartyList(1, 12);
     expect(partyList).toHaveLength(1);
   });
 
@@ -133,7 +133,7 @@ describe('Party test', () => {
   });
 
   test('GetPartyList, check number of participant', async () => {
-    const partyList = await partyRepository.getPartyList();
+    const partyList = await partyRepository.getPartyList(0, 12);
     expect(Number(partyList[0].numberOfParticipant)).toEqual(1);
   });
 });
