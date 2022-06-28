@@ -3,10 +3,11 @@ import { inject, injectable } from 'inversify';
 import { IApiResponse } from '../../common/interface';
 import { IMiddleware } from '../../middleware/interface';
 import { TYPES } from '../../type';
-import { checkRequired } from '../../util';
 import { IHttpRouter } from '../interface';
 import { IAuthService } from './interface';
 import * as config from '../../config';
+import Joi from 'joi';
+import { validateContext } from '../../util/validate';
 
 @injectable()
 export default class AuthRouter implements IHttpRouter {
@@ -21,7 +22,9 @@ export default class AuthRouter implements IHttpRouter {
     this.router.post('/send-email', async (request: Request, response: Response, next: NextFunction) => {
       this.apiResponse.generateResponse(request, response, next, async () => {
         const { email } = request.body;
-        checkRequired([email]);
+        const schema = Joi.string().email().required();
+
+        validateContext(email, schema);
         return await this.authService.sendEmail(email);
       });
     });
@@ -30,8 +33,9 @@ export default class AuthRouter implements IHttpRouter {
     this.router.get('/signin/email', async (request: Request, response: Response, next: NextFunction) => {
       this.apiResponse.generateResponse(request, response, next, async () => {
         const code = request.query.code as string;
-        checkRequired([code]);
+        const schema = Joi.string().required();
 
+        validateContext(code, schema);
         const result = await this.authService.emailSignin(code);
         // TODO: domain setting 추가 해야됨
         response.cookie('accessToken', result.tokenSet.accessToken, {
@@ -58,6 +62,9 @@ export default class AuthRouter implements IHttpRouter {
     this.router.get('/check', async (request: Request, response: Response, next: NextFunction) => {
       this.apiResponse.generateResponse(request, response, next, async () => {
         const code = request.query.code as string;
+        const schema = Joi.string().required();
+
+        validateContext(code, schema);
         return await this.authService.checkSignupRequest(code);
       });
     });
@@ -66,8 +73,13 @@ export default class AuthRouter implements IHttpRouter {
     this.router.post('/signup/email', async (request: Request, response: Response, next: NextFunction) => {
       this.apiResponse.generateResponse(request, response, next, async () => {
         const { code, email, nickname } = request.body;
-        checkRequired([code, email, nickname]);
+        const schema = Joi.object({
+          code: Joi.string().required(),
+          email: Joi.string().email().required(),
+          nickname: Joi.string().required(),
+        });
 
+        validateContext(request.body, schema);
         const signupResult = await this.authService.emailSignup(code, email, nickname);
         const { tokenSet, user } = signupResult;
 

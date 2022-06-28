@@ -25,6 +25,7 @@ export default class PartyRouter implements IHttpRouter {
           title: Joi.string().min(2).max(20).required(),
           page: Joi.number().required(),
         });
+
         validateContext({ title, page }, schema);
         return await this.partyService.searchBook(String(title), Number(page));
       });
@@ -40,6 +41,7 @@ export default class PartyRouter implements IHttpRouter {
             userID: Joi.number().required(),
             partyID: Joi.string().uuid().required(),
           });
+
           validateContext(request.body, schema);
           return await this.partyService.joinParty(userID, partyID);
         });
@@ -50,6 +52,7 @@ export default class PartyRouter implements IHttpRouter {
       this.apiResponse.generateResponse(request, response, next, async () => {
         const { userID } = request.params;
         const schema = Joi.string().required();
+
         validateContext(userID, schema);
         return await this.partyService.getParticipatePartyList(Number(userID));
       });
@@ -66,6 +69,7 @@ export default class PartyRouter implements IHttpRouter {
             partyID: Joi.string().required(),
             userID: Joi.number().required(),
           });
+
           validateContext({ partyID, userID }, schema);
           return await this.partyService.cancelJoin(userID, partyID);
         });
@@ -124,8 +128,8 @@ export default class PartyRouter implements IHttpRouter {
           const schema = Joi.object({
             userID: Joi.number().required(),
           });
-          validateContext(request.body, schema);
 
+          validateContext(request.body, schema);
           return await this.partyService.getOpenCharNotification(userID);
         });
       }
@@ -136,6 +140,7 @@ export default class PartyRouter implements IHttpRouter {
       this.apiResponse.generateResponse(request, response, next, async () => {
         const { bookID } = request.params;
         const schema = Joi.string().required();
+
         validateContext(bookID, schema);
         return await this.partyService.getRelationPartyList(bookID);
       });
@@ -169,6 +174,7 @@ export default class PartyRouter implements IHttpRouter {
             userID: Joi.number().required(),
             availableDay: Joi.array().required(),
           });
+
           validateContext(request.body, schema);
           await this.partyService.registParty({ party, book, ownerID: userID, availableDay });
         });
@@ -204,6 +210,7 @@ export default class PartyRouter implements IHttpRouter {
             userID: Joi.number().required(),
             availableDay: Joi.array().required(),
           });
+
           validateContext(request.body, schema);
           await this.partyService.updateParty(partyID, { party, book, ownerID: userID, availableDay });
         });
@@ -222,8 +229,8 @@ export default class PartyRouter implements IHttpRouter {
             nickname: Joi.string().required(),
             URLSlug: Joi.string().required(),
           });
-          validateContext(request.params, schema);
 
+          validateContext(request.params, schema);
           return await this.partyService.getPartyDetail(nickname, URLSlug, userID);
         });
       }
