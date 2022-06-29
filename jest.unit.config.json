@@ -10,7 +10,7 @@
     "^src/(.*)$": "<rootDir>/$1"
   },
   "clearMocks": true,
-  "collectCoverage": true,
+  "collectCoverage": false,
   "collectCoverageFrom": ["src/**"],
   "testPathIgnorePatterns": ["/node_modules/", "!*.d.ts"],
   "coveragePathIgnorePatterns": ["/node_modules/", "!*.d.ts", "!*.integration.test.ts"]

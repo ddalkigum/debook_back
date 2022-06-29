@@ -31,7 +31,6 @@ export default class Middleware implements IMiddleware {
   public authorization = async (request: Request, response: Response, next: NextFunction) => {
     try {
       const { accessToken, refreshToken } = request.cookies;
-
       if (accessToken) {
         const { userID, isExpired } = verifyToken(accessToken);
         if (!isExpired) {
@@ -86,7 +85,6 @@ export default class Middleware implements IMiddleware {
         }
 
         const { tokenID, userID } = verifyToken(refreshToken);
-        console.log(userID, tokenID);
         const foundToken = await this.authRepository.getTokenByID(tokenID);
 
         if (!foundToken) {

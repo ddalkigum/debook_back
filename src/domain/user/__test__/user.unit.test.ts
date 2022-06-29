@@ -12,7 +12,7 @@ const winstonLogger = container.get<IWinstonLogger>(TYPES.WinstonLogger);
 beforeAll(async () => {
   jest.spyOn(winstonLogger, 'warn').mockImplementation(() => {});
   jest.spyOn(winstonLogger, 'info').mockImplementation(() => {});
-  // jest.spyOn(winstonLogger, 'debug').mockImplementation(() => {});
+  jest.spyOn(winstonLogger, 'debug').mockImplementation(() => {});
   await mariaDB.init();
 });
 

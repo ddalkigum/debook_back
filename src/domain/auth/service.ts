@@ -87,7 +87,6 @@ export default class AuthService implements IAuthService {
   public checkSignupRequest = async (code: string) => {
     this.logger.debug(`AuthService, checkSignupRequest, code: ${code}`);
     const certification = await this.authRepository.getCertificationByCode(code);
-
     if (!certification) throw ErrorGenerator.unAuthorized('DoesNotExistCertification');
 
     const { isSignup, email } = certification;

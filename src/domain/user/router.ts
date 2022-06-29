@@ -18,24 +18,21 @@ export default class UserRouter implements IHttpRouter {
   private router = Router();
 
   public init = () => {
-    this.router.get('/current', async (request: Request, response: Response, next: NextFunction) => {
-      this.apiResponse.generateResponse(request, response, next, async () => {
-        const { accessToken, refreshToken } = request.cookies;
-        if (accessToken) {
-          const { userID, isExpired } = util.token.verifyToken(accessToken);
-          if (!isExpired) {
-            return await this.userService.getUserProfile({ userID });
-          }
-        }
+    this.router.get(
+      '/current',
+      this.middleware.authorization,
+      async (request: Request, response: Response, next: NextFunction) => {
+        this.apiResponse.generateResponse(request, response, next, async () => {
+          const { userID } = request.body;
+          const schema = Joi.object({
+            userID: Joi.number().required(),
+          });
 
-        if (refreshToken) {
-          const { userID, tokenID, isExpired } = util.token.verifyToken(refreshToken);
+          validateContext(request.body, schema);
           return await this.userService.getUserProfile({ userID });
-        }
-
-        return 'DoesNotExistToken';
-      });
-    });
+        });
+      }
+    );
 
     this.router.get('/profile/:nickname', async (request: Request, response: Response, next: NextFunction) => {
       this.apiResponse.generateResponse(request, response, next, async () => {
@@ -71,7 +68,7 @@ export default class UserRouter implements IHttpRouter {
 
     this.router.delete(
       '',
-      // this.middleware.authorization,
+      this.middleware.authorization,
       async (request: Request, response: Response, next: NextFunction) => {
         this.apiResponse.generateResponse(request, response, next, async () => {
           const { userID } = request.body;
@@ -81,6 +78,7 @@ export default class UserRouter implements IHttpRouter {
           await this.userService.deactivate(userID);
           response.clearCookie('accessToken');
           response.clearCookie('refreshToken');
+          return 'Success';
         });
       }
     );

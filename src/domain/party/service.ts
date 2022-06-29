@@ -15,6 +15,69 @@ export default class PartyService implements IPartyService {
   @inject(TYPES.Partyrepository) private partyRepository: IPartyRepository;
   @inject(TYPES.UserRepository) private userRepository: IUserRepository;
 
+  public searchBook = async (title: string, page: number) => {
+    this.logger.debug(`PartyService, searchBook, title: ${title}`);
+    const result = await getBookInfo(title, page);
+
+    if (result.documents.length === 0) {
+      throw ErrorGenerator.notFound();
+    }
+
+    const bookList = result.documents.map((book) => {
+      const { authors, thumbnail, title, isbn } = book;
+      return { id: isbn, authors, thumbnail, title };
+    });
+
+    const isEnd = result.meta.is_end;
+    const nextPage = isEnd ? undefined : page + 1;
+    const lastPage = Math.ceil(result.meta.pageable_count / 10);
+
+    return { bookList, meta: { page, nextPage, isEnd, lastPage } };
+  };
+
+  public joinParty = async (userID: number, partyID: string) => {
+    this.logger.debug(`PartyService, registParticipate`);
+    const foundParty = await this.partyRepository.getPartyEntity(partyID);
+
+    // 보고있던 그룹이 삭제된 경우
+    if (!foundParty) {
+      throw ErrorGenerator.badRequest('DoesNotExistParty');
+    }
+
+    const participantList = await this.partyRepository.getParticipant(partyID);
+
+    // 모집 완료
+    if (foundParty.numberOfRecruit <= participantList.length) {
+      throw ErrorGenerator.badRequest('EndOfRecruit');
+    }
+
+    const isParticipant = participantList.find((participant) => {
+      return participant.userID === userID;
+    });
+
+    if (isParticipant) {
+      throw ErrorGenerator.badRequest('AlreadyRequestParticpate');
+    }
+
+    const participant = await this.partyRepository.insertParticipant(userID, partyID, false);
+    return participant;
+  };
+
+  public getParticipatePartyList = async (userID: number) => {
+    const result = await this.partyRepository.getParticipateParty(userID);
+    return result;
+  };
+
+  public cancelJoin = async (userID: number, partyID: string) => {
+    const foundParticipant = await this.partyRepository.getParticipantEntity({ userID, partyID });
+    if (!foundParticipant) throw ErrorGenerator.badRequest('DoesNotExistParticipant');
+
+    // delete participant
+    await this.partyRepository.deleteNotificationOpenChat({ partyID }),
+      await this.partyRepository.deleteParticipantEntity({ userID, partyID });
+    return 'Success';
+  };
+
   public getMainCardList = async (page: number) => {
     this.logger.debug(`PartyService, getMainCardList`);
 
@@ -23,13 +86,64 @@ export default class PartyService implements IPartyService {
     return partyList;
   };
 
+  public getModifyParty = async (userID: number, partyID: string) => {
+    this.logger.debug(`PartyService, getModifyParty`);
+    const foundPartyList = await this.partyRepository.getModifyParty(partyID);
+    const foundParty = foundPartyList[0];
+
+    if (!foundParty) throw ErrorGenerator.notFound();
+    if (foundParty.ownerID !== userID) throw ErrorGenerator.forbidden('NotTheOwner');
+
+    const foundAvailableDayList = await this.partyRepository.getAvailableDay(partyID);
+    const availableDayList = foundAvailableDayList.map((availableDay) => {
+      return availableDay.dayID;
+    });
+
+    const {
+      partyTitle,
+      numberOfRecruit,
+      openChatURL,
+      openChatPassword,
+      isOnline,
+      region,
+      city,
+      town,
+      description,
+      bookID,
+      bookTitle,
+      bookThumbnail,
+      authors,
+    } = foundParty;
+
+    return {
+      party: {
+        id: foundParty.partyID,
+        title: partyTitle,
+        numberOfRecruit,
+        openChatURL,
+        openChatPassword,
+        isOnline,
+        region,
+        city,
+        town,
+        description,
+      },
+      book: {
+        id: bookID,
+        title: bookTitle,
+        thumbnail: bookThumbnail,
+        authors,
+      },
+      availableDayList,
+    };
+  };
+
   public getPartyDetail = async (nickname: string, URLSlug: string, userID?: number) => {
     this.logger.debug(`PartyService, getPartyDetail`);
     const foundPartyList = await this.partyRepository.getPartyDetail(nickname, URLSlug);
 
     if (!foundPartyList || foundPartyList.length === 0) {
-      const error = ErrorGenerator.notFound();
-      throw error;
+      throw ErrorGenerator.notFound();
     }
 
     const foundParty = foundPartyList[0];
@@ -103,62 +217,14 @@ export default class PartyService implements IPartyService {
     };
   };
 
-  public getModifyParty = async (userID: number, partyID: string) => {
-    this.logger.debug(`PartyService, getModifyParty`);
-    const foundPartyList = await this.partyRepository.getModifyParty(partyID);
-    const foundParty = foundPartyList[0];
-
-    if (!foundParty) throw ErrorGenerator.notFound();
-    if (foundParty.ownerID !== userID) throw ErrorGenerator.notFound();
-
-    const foundAvailableDayList = await this.partyRepository.getAvailableDay(partyID);
-    const availableDayList = foundAvailableDayList.map((availableDay) => {
-      return availableDay.dayID;
-    });
-
-    const {
-      partyTitle,
-      numberOfRecruit,
-      openChatURL,
-      openChatPassword,
-      isOnline,
-      region,
-      city,
-      town,
-      description,
-      bookID,
-      bookTitle,
-      bookThumbnail,
-      authors,
-    } = foundParty;
-
-    return {
-      party: {
-        id: foundParty.partyID,
-        title: partyTitle,
-        numberOfRecruit,
-        openChatURL,
-        openChatPassword,
-        isOnline,
-        region,
-        city,
-        town,
-        description,
-      },
-      book: {
-        id: bookID,
-        title: bookTitle,
-        thumbnail: bookThumbnail,
-        authors,
-      },
-      availableDayList,
-    };
-  };
-
-  public deleteParty = async (partyID: string) => {
+  public deleteParty = async (partyID: string, userID: number) => {
     this.logger.debug(`PartyService, deleteParty`);
     const foundParty = await this.partyRepository.getPartyEntity(partyID);
     if (!foundParty) throw ErrorGenerator.badRequest('DoesNotExistParty');
+
+    if (foundParty.ownerID !== userID) {
+      throw ErrorGenerator.forbidden('DoesNotMatchedDefinedOwnerID');
+    }
 
     await this.partyRepository.deleteParty(partyID);
     return 'Success';
@@ -169,11 +235,6 @@ export default class PartyService implements IPartyService {
 
     // FIXME: 현재 보고있는 페이지는 안보여야 함 filter추가
     return partyList;
-  };
-
-  public getParticipatePartyList = async (userID: number) => {
-    const result = await this.partyRepository.getParticipateParty(userID);
-    return result;
   };
 
   public registParty = async (context: RegistPartyContext) => {
@@ -234,54 +295,11 @@ export default class PartyService implements IPartyService {
     return 'Success';
   };
 
-  public joinParty = async (userID: number, partyID: string) => {
-    this.logger.debug(`PartyService, registParticipate`);
-    const foundParty = await this.partyRepository.getPartyEntity(partyID);
-    const participantList = await this.partyRepository.getParticipant(partyID);
-
-    // 보고있던 그룹이 삭제된 경우
-    if (!foundParty) {
-      throw ErrorGenerator.notFound();
-    }
-
-    // 모집 완료
-    if (foundParty.numberOfRecruit <= participantList.length) {
-      return 'EndOfRecruit';
-    }
-
-    const isParticipant = participantList.find((participant) => {
-      return participant.userID === userID;
-    });
-
-    if (isParticipant) {
-      throw ErrorGenerator.badRequest('AlreadyRequestParticpate');
-    }
-
-    const participant = await this.partyRepository.insertParticipant(userID, partyID, false);
-    return participant;
-  };
-
-  public searchBook = async (title: string, page: number) => {
-    this.logger.debug(`PartyService, searchBook, title: ${title}`);
-    const result = await getBookInfo(title, page);
-    const bookList = result.documents.map((book) => {
-      const { authors, thumbnail, title, isbn } = book;
-      return { id: isbn, authors, thumbnail, title };
-    });
-
-    const isEnd = result.meta.is_end;
-    const nextPage = isEnd ? undefined : page + 1;
-    const lastPage = Math.ceil(result.meta.pageable_count / 10);
-
-    return { bookList, meta: { page, nextPage, isEnd, lastPage } };
-  };
-
   public registNotification = async (userID: number, partyID: string) => {
     // found party
     const foundParty = await this.partyRepository.getPartyEntity(partyID);
     if (!foundParty) {
-      const error = ErrorGenerator.notFound();
-      throw error;
+      throw ErrorGenerator.badRequest('DoesNotExistParty');
     }
 
     // found party , openchat column -> insert noti
@@ -296,6 +314,11 @@ export default class PartyService implements IPartyService {
   // TODO: send email to owner
   public getOpenCharNotification = async (userID: number) => {
     const foundNotificationList = await this.partyRepository.getNotificationOpenChatList(userID);
+
+    if (!foundNotificationList || !foundNotificationList.length) {
+      throw ErrorGenerator.notFound();
+    }
+
     return foundNotificationList.map((noti) => {
       const { notificationID, title, partyID, openChatURL, openChatPassword, bookID, thumbnail } = noti;
       return {
@@ -312,14 +335,5 @@ export default class PartyService implements IPartyService {
         },
       };
     });
-  };
-
-  public cancelJoin = async (userID: number, partyID: string) => {
-    const foundParticipant = await this.partyRepository.getParticipantEntity({ userID, partyID });
-    if (!foundParticipant) throw ErrorGenerator.badRequest('DoesNotExistParticipant');
-    // delete participant
-    await this.partyRepository.deleteNotificationOpenChat({ partyID }),
-      await this.partyRepository.deleteParticipantEntity({ userID, partyID });
-    return 'Success';
   };
 }

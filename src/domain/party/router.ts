@@ -176,7 +176,7 @@ export default class PartyRouter implements IHttpRouter {
           });
 
           validateContext(request.body, schema);
-          await this.partyService.registParty({ party, book, ownerID: userID, availableDay });
+          return await this.partyService.registParty({ party, book, ownerID: userID, availableDay });
         });
       }
     );
@@ -187,7 +187,6 @@ export default class PartyRouter implements IHttpRouter {
       async (request: Request, response: Response, next: NextFunction) => {
         this.apiResponse.generateResponse(request, response, next, async () => {
           const { partyID, party, book, userID, availableDay } = request.body;
-          console.log(request.body);
           const schema = Joi.object({
             partyID: Joi.string().uuid().required(),
             party: Joi.object({
@@ -198,7 +197,7 @@ export default class PartyRouter implements IHttpRouter {
               region: Joi.string().optional(),
               city: Joi.string().optional(),
               town: Joi.string().optional(),
-              isOnline: Joi.number().required(),
+              isOnline: Joi.boolean().required(),
               description: Joi.string().required(),
             }),
             book: Joi.object({
@@ -212,7 +211,7 @@ export default class PartyRouter implements IHttpRouter {
           });
 
           validateContext(request.body, schema);
-          await this.partyService.updateParty(partyID, { party, book, ownerID: userID, availableDay });
+          return await this.partyService.updateParty(partyID, { party, book, ownerID: userID, availableDay });
         });
       }
     );
@@ -249,7 +248,7 @@ export default class PartyRouter implements IHttpRouter {
           });
 
           validateContext({ partyID, userID }, schema);
-          return await this.partyService.deleteParty(partyID);
+          return await this.partyService.deleteParty(partyID, userID);
         });
       }
     );

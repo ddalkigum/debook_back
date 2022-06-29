@@ -29,6 +29,7 @@ export default class ImageRouter implements IHttpRouter {
   public init = () => {
     this.router.post(
       '',
+      this.middleware.authorization,
       multer({ dest: 'image' }).single('image'),
       async (request: Request, response: Response, next: NextFunction) => {
         await this.apiResponse.generateResponse(request, response, next, async () => {

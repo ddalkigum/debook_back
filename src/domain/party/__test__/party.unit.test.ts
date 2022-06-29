@@ -41,7 +41,7 @@ const availableDayList = ['mon', 'fri'];
 const onlineParty: InsertParty = {
   id: util.uuid.generageUUID(),
   title: '제목제목',
-  slug: undefined,
+  slug: '제목제목',
   numberOfRecruit: 4,
   openChatURL: 'https://open.kakao.com/o/',
   openChatPassword: '1234',
@@ -66,7 +66,10 @@ describe('Party test', () => {
   test('InsertParty, Should return party context', async () => {
     const partyContext = onlineParty;
     const insertResult = await partyRepository.insertParty(partyContext);
-    expect(insertResult).toEqual(partyContext);
+    expect(insertResult.title).toEqual(partyContext.title);
+    expect(insertResult.slug).toEqual(partyContext.slug);
+    expect(insertResult.ownerID).toEqual(partyContext.ownerID);
+    expect(insertResult.bookID).toEqual(partyContext.bookID);
   });
 
   test('GetPartyDetail, Should return party include owner data', async () => {
@@ -77,7 +80,7 @@ describe('Party test', () => {
   });
 
   test('GetPartyList, Should return party list', async () => {
-    const partyList = await partyRepository.getPartyList(1, 12);
+    const partyList = await partyRepository.getPartyList(0, 12);
     expect(partyList).toHaveLength(1);
   });
 
@@ -95,9 +98,7 @@ describe('Party test', () => {
 
   test('GetAvailableDay, return availableDay', async () => {
     const result = await partyRepository.getAvailableDay(onlineParty.id);
-    result.map((value, index) => {
-      expect(value.dayID).toEqual(availableDayList[index]);
-    });
+    expect(result.length).toEqual(2);
   });
 
   test('InsertBook, return book', async () => {

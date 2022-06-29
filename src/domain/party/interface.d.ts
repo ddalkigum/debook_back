@@ -89,7 +89,7 @@ export interface GetPartyDetail {
   bookTitle: string;
   bookThumbnail: string;
   authors: string;
-  numberOfParticipant: string;
+  numberOfParticipant: number;
 }
 
 export type InsertAvailableDay = Omit<AvailableDayEntity, 'id'>;
@@ -126,19 +126,19 @@ export interface OpenChatResult {
 }
 
 export interface IPartyService {
+  searchBook: (title: string, page: number) => Promise<SearchBook>;
+  joinParty: (userID: number, partyID: string) => Promise<>;
+  getParticipatePartyList: (userID: number) => Promise<GetPartyDetail[]>;
+  cancelJoin: (userID: number, partyID: string) => Promise<string>;
   getMainCardList: (page: number) => Promise<GetPartyDetail[]>;
-  getPartyDetail: (nickname: string, URLSlug: string, userID?: number) => Promise<any>;
   getModifyParty: (userID: number, partyID: string) => Promise<any>;
-  deleteParty: (partyID: string) => Promise<string>;
+  getPartyDetail: (nickname: string, URLSlug: string, userID?: number) => Promise<any>;
+  deleteParty: (partyID: string, userID: number) => Promise<string>;
   getRelationPartyList: (bookID: string) => Promise<PartyDetailResult>;
-  getParticipatePartyList: (userID: number) => Promise<any>;
   registParty: (context: RegistPartyContext) => Promise<PartyContext>;
   updateParty: (partyID: string, context: RegistPartyContext) => Promise<any>;
-  joinParty: (userID: number, partyID: string) => Promise<>;
-  searchBook: (title: string, page: number) => Promise<SearchBook>;
   registNotification: (userID: number, partyID: string) => Promise<InsertResult<NotificationOpenChatEntity>>;
   getOpenCharNotification: (userID: number) => Promise<OpenChatResult[]>;
-  cancelJoin: (userID: number, partyID: string) => Promise<string>;
 }
 
 export interface IPartyRepository {

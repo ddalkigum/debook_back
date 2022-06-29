@@ -37,6 +37,7 @@ export const getPartyDetailQuery: IJoinQuery<PartyEntity, UserEntity> = {
     party.createdAt,
     party.updatedAt,
     user.id as ownerID,
+    user.nickname,
     user.profileImage,
     book.id as bookID,
     book.title as bookTitle,
