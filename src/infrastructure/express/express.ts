@@ -30,7 +30,7 @@ export class ExpressServer implements IServer {
 
   public set = () => {
     this.app.use(helmet());
-    this.app.use(cors({ origin: config.serverConfig.baseURL, credentials: true }));
+    this.app.use(cors({ origin: config.clientConfig.baseURL, credentials: true }));
     this.app.use(cookieParser());
     this.app.use(express.json());
     this.app.use(express.urlencoded({ extended: false }));
