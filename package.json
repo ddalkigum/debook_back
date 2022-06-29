@@ -5,9 +5,10 @@
   "main": "index.js",
   "scripts": {
     "build": "rimraf ./dist && tsc --build",
-    "start": "npm run build && export NODE_ENV=production && node ./dist/server.js",
-    "start:dev": "export NODE_ENV=development && ts-node ./src/server.ts",
+    "start": "npm run build && export NODE_ENV=production && pm2 start ecosystem.config.js --env production",
+    "start:dev": "export NODE_ENV=development && pm2 start ecosystem.config.js --env development",
     "start:local": "export NODE_ENV=local && nodemon ./src/server.ts",
+    "start:local:pm2": "export NODE_ENV=local && pm2 start ecosystem.config.js --name debook_local --env local",
     "test:unit": "export NODE_ENV=test && jest --config jest.unit.config.json --detectOpenHandles",
     "test:integration": "export NODE_ENV=test && jest --config jest.integration.config.json --detectOpenHandles",
     "docker:start": "docker-compose up -d",

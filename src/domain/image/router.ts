@@ -9,6 +9,8 @@ import { IHttpRouter } from '../interface';
 import { IMiddleware } from '../../middleware/interface';
 import { IS3Client } from '../../infrastructure/aws/s3/interface';
 import * as util from '../../util';
+import * as config from '../../config';
+import ErrorGenerator from '../../common/error';
 
 export interface SendData {
   Location: string;
@@ -35,14 +37,19 @@ export default class ImageRouter implements IHttpRouter {
         await this.apiResponse.generateResponse(request, response, next, async () => {
           const s3 = this.s3Client.get();
           const { filename, mimetype } = request.file;
-          const imageFileExtention = filename.split('/')[1];
+          const imageFileExtention = mimetype.split('/')[1];
+
+          if (imageFileExtention !== 'png' && imageFileExtention !== 'jpg' && imageFileExtention !== 'jpeg') {
+            throw ErrorGenerator.badRequest('NotSupportedType');
+          }
+
           const imageFile = fs.readFileSync(`image/${filename}`);
           const { user, type } = request.body;
           const parsedUser = JSON.parse(user);
           const fileID = util.uuid.generageUUID();
           const upload: any = s3.upload(
             {
-              Bucket: 'goback',
+              Bucket: config.awsConfig.bucketName,
               Key: `image/${type}/${parsedUser.nickname}/${fileID}.${imageFileExtention}`,
               Body: imageFile,
               ContentType: mimetype,
