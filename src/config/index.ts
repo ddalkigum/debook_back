@@ -33,5 +33,4 @@ export { default as authConfig } from './auth';
 export { default as awsConfig } from './aws';
 export { default as clientConfig } from './client';
 export { default as dbConfig } from './mariaDB';
-export { default as redisConfig } from './redisDB';
 export { default as serverConfig } from './server';

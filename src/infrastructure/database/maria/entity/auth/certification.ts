@@ -6,6 +6,7 @@ export default class CertificationEntity {
   @PrimaryColumn({ type: 'varchar', length: 36 })
   id: string;
 
+  @Index('indexCertificationEmail')
   @Column({ type: 'varchar', length: 100 })
   email: string;
 

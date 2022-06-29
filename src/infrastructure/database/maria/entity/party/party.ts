@@ -12,6 +12,7 @@ export default class PartyEntity extends DateTimeEntity {
   @Column({ type: 'varchar', length: 30 })
   title: string;
 
+  @Index('indexPartySlug')
   @Column({ type: 'varchar', nullable: true })
   slug: string;
 

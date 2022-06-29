@@ -62,9 +62,9 @@ export default class PartyRepository implements IPartyRepository {
     return await this.mariaDB.executeQuery(getPartyListQuery.query, [offset, itemCount]);
   };
 
-  public getPartyDetail = async (nickname: string, partyTitle: string) => {
-    this.logger.debug(`PartyRepository, getPartyDetail, nickname: ${nickname}, partyTitle: ${partyTitle}`);
-    return await this.mariaDB.executeQuery(getPartyDetailQuery.query, [nickname, partyTitle]);
+  public getPartyDetail = async (nickname: string, slug: string) => {
+    this.logger.debug(`PartyRepository, getPartyDetail, nickname: ${nickname}, slug: ${slug}`);
+    return await this.mariaDB.executeQuery(getPartyDetailQuery.query, [nickname, slug]);
   };
 
   public getPartyByTitle = async (nickname: string, partyTitle: string) => {
