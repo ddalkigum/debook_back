@@ -2,7 +2,7 @@ const DEFAULT_JWT_SIGN_KEY = 'goback';
 
 const authConfig = {
   jwtSignKey: process.env.JWT_SIGN_KEY || DEFAULT_JWT_SIGN_KEY,
-  issuer: process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : 'https://...',
+  issuer: process.env.NODE_ENV === 'production' ? 'https://api.debook.me' : 'http://localhost:3000',
   googleClientID: process.env.GOOGLE_CLIENT_ID,
   maxAge: {
     accessToken: 1000 * 60 * 60,
