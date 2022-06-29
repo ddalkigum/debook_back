@@ -4,7 +4,7 @@ module.exports = {
   apps: [
     {
       name: 'debook',
-      script: env === 'production' ? './dist/src/server.js' : './src/server.ts',
+      script: env === 'production' ? './dist/server.js' : './src/server.ts',
       exec_mode: 'cluster',
       instances: env === 'production' ? '4' : '1',
       env_production: {
