@@ -20,7 +20,7 @@ export default class UserRouter implements IHttpRouter {
   public init = () => {
     this.router.get(
       '/current',
-      this.middleware.authorization,
+      this.middleware.checkLogin,
       async (request: Request, response: Response, next: NextFunction) => {
         this.apiResponse.generateResponse(request, response, next, async () => {
           const { userID } = request.body;
@@ -29,7 +29,10 @@ export default class UserRouter implements IHttpRouter {
           });
 
           validateContext(request.body, schema);
-          return await this.userService.getUserProfile({ userID });
+          if (userID) {
+            return await this.userService.getUserProfile({ userID });
+          }
+          return 'Success';
         });
       }
     );

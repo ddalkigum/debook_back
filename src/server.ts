@@ -9,7 +9,7 @@ const server: IServer = container.get(TYPES.Server);
 const mariaDB: IMariaDB = container.get(TYPES.MariaDB);
 
 const start = async () => {
-  console.log('config: ', config);
+  console.log('config: ', JSON.stringify(config));
   await mariaDB.init();
 
   server.set();
