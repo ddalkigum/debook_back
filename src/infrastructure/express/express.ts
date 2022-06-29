@@ -8,6 +8,7 @@ import { TYPES } from '../../type';
 import { IMorganLogger, IWinstonLogger } from '../logger/interface';
 import { IHttpRouter } from '../../domain/interface';
 import { IApiResponse } from '../../common/interface';
+import * as config from '../../config';
 
 @injectable()
 export class ExpressServer implements IServer {
@@ -29,7 +30,7 @@ export class ExpressServer implements IServer {
 
   public set = () => {
     this.app.use(helmet());
-    this.app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
+    this.app.use(cors({ origin: config.serverConfig.baseURL, credentials: true }));
     this.app.use(cookieParser());
     this.app.use(express.json());
     this.app.use(express.urlencoded({ extended: false }));

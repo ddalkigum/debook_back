@@ -60,10 +60,12 @@ export default class Middleware implements IMiddleware {
       await this.authRepository.updateToken(userID, tokenSet);
       request.body.userID = userID;
       response.cookie('accessToken', tokenSet.accessToken, {
+        domain: 'https://debook.me',
         httpOnly: true,
         maxAge: config.authConfig.maxAge.accessToken,
       });
       response.cookie('refreshToken', tokenSet.refreshToken, {
+        domain: 'https://debook.me',
         httpOnly: true,
         maxAge: config.authConfig.maxAge.refreshToken,
       });
@@ -95,6 +97,7 @@ export default class Middleware implements IMiddleware {
         await this.authRepository.updateToken(userID, { accessToken: newAccessToken });
         request.body.userID = userID;
         response.cookie('accessToken', newAccessToken, {
+          domain: 'https://debook.me',
           httpOnly: true,
           maxAge: config.authConfig.maxAge.accessToken,
         });

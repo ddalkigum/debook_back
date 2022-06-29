@@ -6,7 +6,7 @@ module.exports = {
       name: 'debook',
       script: env === 'production' ? './dist/server.js' : './src/server.ts',
       exec_mode: 'cluster',
-      instances: env === 'production' ? '4' : '1',
+      instances: env === 'production' ? '2' : '1',
       env_production: {
         NODE_ENV: 'production',
       },

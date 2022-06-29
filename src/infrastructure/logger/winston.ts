@@ -44,12 +44,22 @@ export default class WinstonLogger implements IWinstonLogger {
           maxFiles: 30, // 30-day logs
           zippedArchive: true,
         }),
+
         // error level log
         new WinstonDaily({
           level: 'error',
           datePattern: 'YYYY-MM-DD',
           dirname: logDir + '/error', // error.log 파일은 /logs/error 하위에 저장
           filename: '%DATE%.error.log',
+          maxFiles: 30, // 30-day logs
+          zippedArchive: true,
+        }),
+
+        new WinstonDaily({
+          level: 'warn',
+          datePattern: 'YYYY-MM-DD',
+          dirname: logDir + '/warn', // error.log 파일은 /logs/error 하위에 저장
+          filename: '%DATE%.warn.log',
           maxFiles: 30, // 30-day logs
           zippedArchive: true,
         }),
