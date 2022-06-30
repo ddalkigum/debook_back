@@ -195,7 +195,7 @@ describe('Search book test', () => {
       .get('/v1/party/search/book')
       .query({ title: 'testBook', page: 1 })
       .expect((response) => {
-        expect(response.body.result.name).toEqual('NotFound');
+        expect(response.body.result.bookList).toHaveLength(0);
       });
   });
 });
@@ -429,9 +429,7 @@ describe('Get notification', () => {
       .get('/v1/party/notification')
       .set('Cookie', `accessToken=${tokenSet.accessToken}`)
       .expect((response) => {
-        const { name, message } = response.body.result;
-        expect(name).toEqual('NotFound');
-        expect(message).toEqual('NotFound');
+        expect(response.body.result).toHaveLength(0);
       });
   });
 });
