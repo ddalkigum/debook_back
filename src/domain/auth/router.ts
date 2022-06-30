@@ -39,12 +39,14 @@ export default class AuthRouter implements IHttpRouter {
         const result = await this.authService.emailSignin(code);
         // TODO: domain setting 추가 해야됨
         response.cookie('accessToken', result.tokenSet.accessToken, {
-          domain: 'https://debook.me',
+          domain:
+            process.env.NODE_ENV === 'production' ? config.serverConfig.baseURL.replace('https://api', '.') : undefined,
           httpOnly: true,
           maxAge: config.authConfig.maxAge.accessToken,
         });
         response.cookie('refreshToken', result.tokenSet.refreshToken, {
-          domain: 'https://debook.me',
+          domain:
+            process.env.NODE_ENV === 'production' ? config.serverConfig.baseURL.replace('https://api', '.') : undefined,
           httpOnly: true,
           maxAge: config.authConfig.maxAge.refreshToken,
         });
@@ -85,14 +87,15 @@ export default class AuthRouter implements IHttpRouter {
         const signupResult = await this.authService.emailSignup(code, email, nickname);
         const { tokenSet, user } = signupResult;
 
-        // TODO: domain setting 추가 해야됨
         response.cookie('accessToken', tokenSet.accessToken, {
-          domain: 'https://debook.me',
+          domain:
+            process.env.NODE_ENV === 'production' ? config.serverConfig.baseURL.replace('https://api', '.') : undefined,
           httpOnly: true,
           maxAge: config.authConfig.maxAge.accessToken,
         });
         response.cookie('refreshToken', tokenSet.refreshToken, {
-          domain: 'https://debook.me',
+          domain:
+            process.env.NODE_ENV === 'production' ? config.serverConfig.baseURL.replace('https://api', '.') : undefined,
           httpOnly: true,
           maxAge: config.authConfig.maxAge.refreshToken,
         });

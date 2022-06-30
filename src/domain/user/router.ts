@@ -25,14 +25,14 @@ export default class UserRouter implements IHttpRouter {
         this.apiResponse.generateResponse(request, response, next, async () => {
           const { userID } = request.body;
           const schema = Joi.object({
-            userID: Joi.number().required(),
+            userID: Joi.number().optional(),
           });
 
           validateContext(request.body, schema);
           if (userID) {
             return await this.userService.getUserProfile({ userID });
           }
-          return 'Success';
+          return;
         });
       }
     );

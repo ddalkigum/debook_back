@@ -20,7 +20,7 @@ export default class PartyService implements IPartyService {
     const result = await getBookInfo(title, page);
 
     if (result.documents.length === 0) {
-      throw ErrorGenerator.notFound();
+      return { bookList: [], meta: { page: 0, nextPage: 0, isEnd: true, lastPage: 0 } };
     }
 
     const bookList = result.documents.map((book) => {
@@ -98,6 +98,10 @@ export default class PartyService implements IPartyService {
     const availableDayList = foundAvailableDayList.map((availableDay) => {
       return availableDay.dayID;
     });
+
+    if (typeof foundParty.isOnline === 'number') {
+      foundParty.isOnline = foundParty.isOnline === 1 ? true : false;
+    }
 
     const {
       partyTitle,
@@ -316,7 +320,7 @@ export default class PartyService implements IPartyService {
     const foundNotificationList = await this.partyRepository.getNotificationOpenChatList(userID);
 
     if (!foundNotificationList || !foundNotificationList.length) {
-      throw ErrorGenerator.notFound();
+      return [];
     }
 
     return foundNotificationList.map((noti) => {

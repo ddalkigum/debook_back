@@ -60,12 +60,14 @@ export default class Middleware implements IMiddleware {
       await this.authRepository.updateToken(userID, tokenSet);
       request.body.userID = userID;
       response.cookie('accessToken', tokenSet.accessToken, {
-        domain: 'https://debook.me',
+        domain:
+          process.env.NODE_ENV === 'production' ? config.serverConfig.baseURL.replace('https://api', '.') : undefined,
         httpOnly: true,
         maxAge: config.authConfig.maxAge.accessToken,
       });
       response.cookie('refreshToken', tokenSet.refreshToken, {
-        domain: 'https://debook.me',
+        domain:
+          process.env.NODE_ENV === 'production' ? config.serverConfig.baseURL.replace('https://api', '.') : undefined,
         httpOnly: true,
         maxAge: config.authConfig.maxAge.refreshToken,
       });
@@ -97,7 +99,8 @@ export default class Middleware implements IMiddleware {
         await this.authRepository.updateToken(userID, { accessToken: newAccessToken });
         request.body.userID = userID;
         response.cookie('accessToken', newAccessToken, {
-          domain: 'https://debook.me',
+          domain:
+            process.env.NODE_ENV === 'production' ? config.serverConfig.baseURL.replace('https://api', '.') : undefined,
           httpOnly: true,
           maxAge: config.authConfig.maxAge.accessToken,
         });
@@ -107,14 +110,8 @@ export default class Middleware implements IMiddleware {
       const { userID } = verifyToken(accessToken);
       request.body.userID = userID;
       return next();
-    } catch (error) {}
-
-    try {
-      const { userID } = verifyToken(accessToken);
-      request.body.userID = userID;
-      return next();
     } catch (error) {
-      return next();
+      next();
     }
   };
 }
