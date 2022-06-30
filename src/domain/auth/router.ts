@@ -40,13 +40,13 @@ export default class AuthRouter implements IHttpRouter {
         // TODO: domain setting 추가 해야됨
         response.cookie('accessToken', result.tokenSet.accessToken, {
           domain:
-            process.env.NODE_ENV === 'production' ? config.serverConfig.baseURL.replace('https://api', '.') : undefined,
+            process.env.NODE_ENV === 'production' ? config.serverConfig.baseURL.replace('https://api', '') : undefined,
           httpOnly: true,
           maxAge: config.authConfig.maxAge.accessToken,
         });
         response.cookie('refreshToken', result.tokenSet.refreshToken, {
           domain:
-            process.env.NODE_ENV === 'production' ? config.serverConfig.baseURL.replace('https://api', '.') : undefined,
+            process.env.NODE_ENV === 'production' ? config.serverConfig.baseURL.replace('https://api', '') : undefined,
           httpOnly: true,
           maxAge: config.authConfig.maxAge.refreshToken,
         });
@@ -89,13 +89,13 @@ export default class AuthRouter implements IHttpRouter {
 
         response.cookie('accessToken', tokenSet.accessToken, {
           domain:
-            process.env.NODE_ENV === 'production' ? config.serverConfig.baseURL.replace('https://api', '.') : undefined,
+            process.env.NODE_ENV === 'production' ? config.serverConfig.baseURL.replace('https://api', '') : undefined,
           httpOnly: true,
           maxAge: config.authConfig.maxAge.accessToken,
         });
         response.cookie('refreshToken', tokenSet.refreshToken, {
           domain:
-            process.env.NODE_ENV === 'production' ? config.serverConfig.baseURL.replace('https://api', '.') : undefined,
+            process.env.NODE_ENV === 'production' ? config.serverConfig.baseURL.replace('https://api', '') : undefined,
           httpOnly: true,
           maxAge: config.authConfig.maxAge.refreshToken,
         });
