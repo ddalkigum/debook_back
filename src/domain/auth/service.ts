@@ -79,7 +79,7 @@ export default class AuthService implements IAuthService {
         const oauth2Client = new google.auth.OAuth2(
           config.authConfig.googleClientID,
           config.authConfig.googleClientSecret,
-          'http://localhost:3001/v1/auth/redirect/google'
+          `${config.serverConfig.baseURL}/v1/auth/redirect/google`
         );
 
         const url = oauth2Client.generateAuthUrl({
