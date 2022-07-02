@@ -13,7 +13,7 @@ export default class AuthRepository implements IAuthRepository {
   @inject(TYPES.MariaDB) private mariaDB: IMariaDB;
 
   public insertCertification = async (context: CertificationEntity) => {
-    this.logger.debug(`AuthRepository, insertCertification, context: ${context}`);
+    this.logger.debug(`AuthRepository, insertCertification, context: ${JSON.stringify(context)}`);
     return await this.mariaDB.insert<CertificationEntity>(Constants.CERTIFICATION_TABLE, context);
   };
 

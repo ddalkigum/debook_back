@@ -1,3 +1,4 @@
+import { Response } from 'express';
 import jwt, { TokenExpiredError } from 'jsonwebtoken';
 import * as config from '../config';
 import { TokenSet } from '../domain/auth/interface';

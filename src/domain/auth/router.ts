@@ -1,3 +1,4 @@
+import Joi from 'joi';
 import { NextFunction, Request, Response, Router } from 'express';
 import { inject, injectable } from 'inversify';
 import { IApiResponse } from '../../common/interface';
@@ -5,9 +6,9 @@ import { IMiddleware } from '../../middleware/interface';
 import { TYPES } from '../../type';
 import { IHttpRouter } from '../interface';
 import { IAuthService } from './interface';
-import * as config from '../../config';
-import Joi from 'joi';
 import { validateContext } from '../../util/validate';
+import * as config from '../../config';
+import * as util from '../../util';
 
 @injectable()
 export default class AuthRouter implements IHttpRouter {
@@ -37,21 +38,40 @@ export default class AuthRouter implements IHttpRouter {
 
         validateContext(code, schema);
         const result = await this.authService.emailSignin(code);
-        // TODO: domain setting 추가 해야됨
         response.cookie('accessToken', result.tokenSet.accessToken, {
           domain:
-            process.env.NODE_ENV === 'production' ? config.serverConfig.baseURL.replace('https://api', '') : undefined,
+            process.env.NODE_ENV === 'production'
+              ? config.serverConfig.baseURL.replace('https://api', '')
+              : 'localhost',
           httpOnly: true,
           maxAge: config.authConfig.maxAge.accessToken,
         });
         response.cookie('refreshToken', result.tokenSet.refreshToken, {
           domain:
-            process.env.NODE_ENV === 'production' ? config.serverConfig.baseURL.replace('https://api', '') : undefined,
+            process.env.NODE_ENV === 'production'
+              ? config.serverConfig.baseURL.replace('https://api', '')
+              : 'localhost',
           httpOnly: true,
           maxAge: config.authConfig.maxAge.refreshToken,
         });
         return result.user;
       });
+    });
+
+    this.router.get('/redirect/google', async (request: Request, response: Response, next: NextFunction) => {
+      try {
+        const code = request.query.code as string;
+        const redirectURL = await this.authService.googleSignin(code);
+        response.redirect(redirectURL);
+      } catch (error) {
+        next(error);
+      }
+    });
+
+    this.router.get('/redirect', (request: Request, response: Response, next: NextFunction) => {
+      const provider = request.query.provider as string;
+      const redirectURL = this.authService.generateRedirectURL(provider);
+      response.redirect(redirectURL);
     });
 
     this.router.get(
@@ -89,13 +109,17 @@ export default class AuthRouter implements IHttpRouter {
 
         response.cookie('accessToken', tokenSet.accessToken, {
           domain:
-            process.env.NODE_ENV === 'production' ? config.serverConfig.baseURL.replace('https://api', '') : undefined,
+            process.env.NODE_ENV === 'production'
+              ? config.serverConfig.baseURL.replace('https://api', '')
+              : 'localhost',
           httpOnly: true,
           maxAge: config.authConfig.maxAge.accessToken,
         });
         response.cookie('refreshToken', tokenSet.refreshToken, {
           domain:
-            process.env.NODE_ENV === 'production' ? config.serverConfig.baseURL.replace('https://api', '') : undefined,
+            process.env.NODE_ENV === 'production'
+              ? config.serverConfig.baseURL.replace('https://api', '')
+              : 'localhost',
           httpOnly: true,
           maxAge: config.authConfig.maxAge.refreshToken,
         });
