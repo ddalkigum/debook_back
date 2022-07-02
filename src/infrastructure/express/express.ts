@@ -1,6 +1,8 @@
 import express from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
+import https from 'https';
+import fs from 'fs';
 import cookieParser from 'cookie-parser';
 import { inject, injectable } from 'inversify';
 import { IServer } from './interface';
@@ -30,7 +32,7 @@ export class ExpressServer implements IServer {
 
   public set = () => {
     this.app.use(helmet());
-    this.app.use(cors({ origin: config.clientConfig.baseURL, credentials: true }));
+    this.app.use(cors({ origin: '*' }));
     this.app.use(cookieParser());
     this.app.use(express.json());
     this.app.use(express.urlencoded({ extended: false }));
@@ -50,13 +52,27 @@ export class ExpressServer implements IServer {
     this.app.use('/v1/image', this.imageRouter.get());
     this.app.use('/v1/user', this.userRouter.get());
 
-    // TODO: Error handler
     this.app.use(this.apiResponse.errorResponse);
   };
 
   public start = (port: string) => {
-    this.app.listen(port);
-    this.logger.info(`Server on ${port}, environment: ${process.env.NODE_ENV}`);
+    if (process.env.SERVER_TYPE) {
+      const keyFile = fs.readFileSync('pem/localhost-key.pem');
+      const certFile = fs.readFileSync('pem/localhost.pem');
+      https
+        .createServer(
+          {
+            key: keyFile,
+            cert: certFile,
+          },
+          this.getServer()
+        )
+        .listen(port);
+      this.logger.info(`Https server on ${port}, environment: ${process.env.NODE_ENV}`);
+    } else {
+      this.app.listen(port);
+      this.logger.info(`Server on ${port}, environment: ${process.env.NODE_ENV}`);
+    }
   };
 
   public exit = () => {

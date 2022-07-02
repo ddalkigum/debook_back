@@ -25,6 +25,8 @@ export interface SigninResult {
 export interface IAuthService {
   emailSignup: (code: string, email: string, nickname: string) => Promise<SignupResult>;
   emailSignin: (code: string) => Promise<SigninResult>;
+  generateRedirectURL: (provider: string) => string;
+  googleSignin: (code: string) => Promise<any>;
   sendEmail: (email: string) => Promise<string>;
   checkSignupRequest: (code: string) => Promise<CheckSignup>;
 }

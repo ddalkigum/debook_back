@@ -61,13 +61,13 @@ export default class Middleware implements IMiddleware {
       request.body.userID = userID;
       response.cookie('accessToken', tokenSet.accessToken, {
         domain:
-          process.env.NODE_ENV === 'production' ? config.serverConfig.baseURL.replace('https://api', '') : undefined,
+          process.env.NODE_ENV === 'production' ? config.serverConfig.baseURL.replace('https://api', '') : 'localhost',
         httpOnly: true,
         maxAge: config.authConfig.maxAge.accessToken,
       });
       response.cookie('refreshToken', tokenSet.refreshToken, {
         domain:
-          process.env.NODE_ENV === 'production' ? config.serverConfig.baseURL.replace('https://api', '') : undefined,
+          process.env.NODE_ENV === 'production' ? config.serverConfig.baseURL.replace('https://api', '') : 'localhost',
         httpOnly: true,
         maxAge: config.authConfig.maxAge.refreshToken,
       });
@@ -100,7 +100,9 @@ export default class Middleware implements IMiddleware {
         request.body.userID = userID;
         response.cookie('accessToken', newAccessToken, {
           domain:
-            process.env.NODE_ENV === 'production' ? config.serverConfig.baseURL.replace('https://api', '') : undefined,
+            process.env.NODE_ENV === 'production'
+              ? config.serverConfig.baseURL.replace('https://api', '')
+              : 'localhost',
           httpOnly: true,
           maxAge: config.authConfig.maxAge.accessToken,
         });

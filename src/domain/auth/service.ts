@@ -1,12 +1,18 @@
+import axios from 'axios';
+import { google } from 'googleapis';
 import { inject, injectable } from 'inversify';
 import { IWinstonLogger } from '../../infrastructure/logger/interface';
 import { TYPES } from '../../type';
 import { IUserRepository } from '../user/interface';
 import { IAuthRepository, IAuthService } from './interface';
-import * as util from '../../util';
-import * as config from '../../config';
 import { ISES } from '../../infrastructure/aws/ses/interface';
 import ErrorGenerator from '../../common/error';
+import * as util from '../../util';
+import * as config from '../../config';
+
+const GOOGLE_AUTH_URL = 'https://accounts.google.com/o/oauth2/v2/auth';
+const GOOGLE_AUTH_TOKEN_URL = 'https://oauth2.googleapis.com/token';
+const GOOGLE_AUTH_REDIRECT_URL = `${config.serverConfig.baseURL}/v1/auth/redirect/google`;
 
 @injectable()
 export default class AuthService implements IAuthService {
@@ -65,6 +71,66 @@ export default class AuthService implements IAuthService {
     await this.authRepository.updateToken(foundUser.id, tokenSet);
     await this.authRepository.deleteCertificationByCode(code);
     return { tokenSet, user: foundUser };
+  };
+
+  public generateRedirectURL = (provider: string) => {
+    const URLGenerator = {
+      google: () => {
+        const oauth2Client = new google.auth.OAuth2(
+          config.authConfig.googleClientID,
+          config.authConfig.googleClientSecret,
+          'http://localhost:3001/v1/auth/redirect/google'
+        );
+
+        const url = oauth2Client.generateAuthUrl({
+          scope: 'https://www.googleapis.com/auth/userinfo.email',
+        });
+
+        return url;
+      },
+    };
+
+    return URLGenerator[provider]();
+  };
+
+  public googleSignin = async (code: string) => {
+    const response = await axios.post(
+      GOOGLE_AUTH_TOKEN_URL,
+      {},
+      {
+        headers: { 'content-type': 'application/x-www-form-urlencoded;charset=utf-8' },
+        params: {
+          grant_type: 'authorization_code',
+          client_id: config.authConfig.googleClientID,
+          client_secret: config.authConfig.googleClientSecret,
+          redirectUri: GOOGLE_AUTH_REDIRECT_URL,
+          code: code,
+        },
+      }
+    );
+
+    const accessToken = response.data['access_token'];
+    const getUserResponse = await axios.get(
+      `https://www.googleapis.com/oauth2/v3/userinfo?access_token=${accessToken}`
+    );
+    const { email } = getUserResponse.data;
+    const foundUser = await this.userRepository.getUserByEmail(email);
+
+    const certificationID = util.uuid.generageUUID();
+    const deleteTime = util.date.setDateTime(60 * 60);
+    const certificationCode = util.hex.generateHexString(10);
+    const isSignup = foundUser ? false : true;
+    const urlPath = foundUser ? 'signin' : 'signup';
+
+    await this.authRepository.insertCertification({
+      id: certificationID,
+      email,
+      code: certificationCode,
+      isSignup,
+      deleteTime,
+    });
+    const redirectURL = `${config.clientConfig.baseURL}/${urlPath}?code=${certificationCode}`;
+    return redirectURL;
   };
 
   public sendEmail = async (email: string) => {
