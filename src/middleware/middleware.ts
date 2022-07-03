@@ -8,6 +8,7 @@ import { IMiddleware } from './interface';
 import { TYPES } from '../type';
 import ErrorGenerator from '../common/error';
 import { IS3Client } from '../infrastructure/aws/s3/interface';
+import { setCookie, unSetCookie } from '../util/cookie';
 
 const verifyToken = (token: string) => {
   let isExpired = false;
@@ -59,22 +60,10 @@ export default class Middleware implements IMiddleware {
       // Update token
       await this.authRepository.updateToken(userID, tokenSet);
       request.body.userID = userID;
-      response.cookie('accessToken', tokenSet.accessToken, {
-        domain:
-          process.env.NODE_ENV === 'production' ? config.serverConfig.baseURL.replace('https://api', '') : 'localhost',
-        httpOnly: true,
-        maxAge: config.authConfig.maxAge.accessToken,
-      });
-      response.cookie('refreshToken', tokenSet.refreshToken, {
-        domain:
-          process.env.NODE_ENV === 'production' ? config.serverConfig.baseURL.replace('https://api', '') : 'localhost',
-        httpOnly: true,
-        maxAge: config.authConfig.maxAge.refreshToken,
-      });
+      setCookie(response, tokenSet.accessToken, tokenSet.refreshToken);
       return next();
     } catch (error) {
-      response.clearCookie('accessToken');
-      response.clearCookie('refreshToken');
+      unSetCookie(response);
       next(error);
     }
   };
@@ -98,14 +87,7 @@ export default class Middleware implements IMiddleware {
         const newAccessToken = util.token.generateAccessToken({ userID }, config.authConfig.issuer);
         await this.authRepository.updateToken(userID, { accessToken: newAccessToken });
         request.body.userID = userID;
-        response.cookie('accessToken', newAccessToken, {
-          domain:
-            process.env.NODE_ENV === 'production'
-              ? config.serverConfig.baseURL.replace('https://api', '')
-              : 'localhost',
-          httpOnly: true,
-          maxAge: config.authConfig.maxAge.accessToken,
-        });
+        setCookie(response, newAccessToken);
         return next();
       }
 

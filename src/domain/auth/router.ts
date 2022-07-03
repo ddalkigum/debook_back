@@ -9,6 +9,7 @@ import { IAuthService } from './interface';
 import { validateContext } from '../../util/validate';
 import * as config from '../../config';
 import * as util from '../../util';
+import { setCookie } from '../../util/cookie';
 
 @injectable()
 export default class AuthRouter implements IHttpRouter {
@@ -38,22 +39,8 @@ export default class AuthRouter implements IHttpRouter {
 
         validateContext(code, schema);
         const result = await this.authService.emailSignin(code);
-        response.cookie('accessToken', result.tokenSet.accessToken, {
-          domain:
-            process.env.NODE_ENV === 'production'
-              ? config.serverConfig.baseURL.replace('https://api', '')
-              : 'localhost',
-          httpOnly: true,
-          maxAge: config.authConfig.maxAge.accessToken,
-        });
-        response.cookie('refreshToken', result.tokenSet.refreshToken, {
-          domain:
-            process.env.NODE_ENV === 'production'
-              ? config.serverConfig.baseURL.replace('https://api', '')
-              : 'localhost',
-          httpOnly: true,
-          maxAge: config.authConfig.maxAge.refreshToken,
-        });
+
+        setCookie(response, result.tokenSet.accessToken, result.tokenSet.refreshToken);
         return result.user;
       });
     });
@@ -107,22 +94,7 @@ export default class AuthRouter implements IHttpRouter {
         const signupResult = await this.authService.emailSignup(code, email, nickname);
         const { tokenSet, user } = signupResult;
 
-        response.cookie('accessToken', tokenSet.accessToken, {
-          domain:
-            process.env.NODE_ENV === 'production'
-              ? config.serverConfig.baseURL.replace('https://api', '')
-              : 'localhost',
-          httpOnly: true,
-          maxAge: config.authConfig.maxAge.accessToken,
-        });
-        response.cookie('refreshToken', tokenSet.refreshToken, {
-          domain:
-            process.env.NODE_ENV === 'production'
-              ? config.serverConfig.baseURL.replace('https://api', '')
-              : 'localhost',
-          httpOnly: true,
-          maxAge: config.authConfig.maxAge.refreshToken,
-        });
+        setCookie(response, tokenSet.accessToken, tokenSet.accessToken);
         return user;
       });
     });
