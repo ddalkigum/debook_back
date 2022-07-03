@@ -13,7 +13,7 @@ export default class WinstonLogger implements IWinstonLogger {
 
   public init = (): boolean => {
     const { combine, timestamp, printf } = Winston.format;
-    const logDir = process.env.NODE_ENV === 'production' ? 'logs001' : 'logs';
+    const logDir = process.env.NODE_ENV === 'production' ? '/home/debook/logs' : 'logs';
 
     const logFormat = printf(({ level, timestamp, message }) => {
       return `${timestamp} ${level}: ${message}`;

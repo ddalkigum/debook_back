@@ -1,0 +1,57 @@
+name: build_deploy
+
+env:
+  PROJECT_NAME: debook_api_server
+  BUCKET_NAME: debook
+
+on:
+  push:
+    branches: [main, feature/CD]
+
+jobs:
+  CD:
+    runs-on: ubuntu-20.04
+
+    strategy:
+      matrix:
+        node-version: [16.x]
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+
+      - name: Checkout github workspace
+        uses: actions/checkout@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Build
+        run: npm run build
+
+      - name: Create env file
+        run: |
+          touch .env
+          cat << EOF >> .env
+          ${{ secrets.ENV }}
+
+      - name: Tar
+        run: cd .. && tar -zcf debook.tgz debook_back
+        shell: bash
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_ACCESS_SECRET }}
+          aws-region: ${{ secrets.AWS_REGION}}
+
+      - name: Upload to S3
+        run: cd .. && aws s3 cp --region ${{ secrets.AWS_REGION }} ./debook.tgz s3://s3-debook/deploy/debook.tgz
+
+      - name: Deploy
+        run: aws deploy create-deployment --application-name DEBOOK-API-CODE-DEPLOY --file-exists-behavior OVERWRITE --deployment-config-name CodeDeployDefault.AllAtOnce --deployment-group-name deploy_debook --s3-location bucket=s3-debook,bundleType=tgz,key=deploy/debook.tgz

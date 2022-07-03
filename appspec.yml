@@ -1,0 +1,19 @@
+version: 0.0
+os: linux
+
+files:
+  - source: /
+    destination: /home/debook/debook_back
+
+permissions:
+  - object: /home/debook
+    pattern: '**'
+    owner: debook
+
+hooks:
+  BeforeInstall:
+    - location: script/before_install.sh
+      runas: debook
+  AfterInstall:
+    - location: script/after_install.sh
+      runas: debook
