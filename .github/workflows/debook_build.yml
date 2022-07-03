@@ -54,4 +54,8 @@ jobs:
         run: cd .. && aws s3 cp --region ${{ secrets.AWS_REGION }} ./debook.tgz s3://s3-debook/deploy/debook.tgz
 
       - name: Deploy
+<<<<<<< HEAD
         run: aws deploy create-deployment --application-name DEBOOK-API-CODE-DEPLOY --file-exists-behavior OVERWRITE --deployment-config-name CodeDeployDefault.AllAtOnce --deployment-group-name debook_code_deploy --s3-location bucket=s3-debook,bundleType=tgz,key=deploy/debook.tgz
+=======
+        run: aws deploy create-deployment --application-name DEBOOK-API-CODE-DEPLOY --file-exists-behavior OVERWRITE --deployment-config-name CodeDeployDefault.AllAtOnce --deployment-group-name deploy_debook --s3-location bucket=s3-debook,bundleType=tgz,key=deploy/debook.tgz
+>>>>>>> 664d31d72a8e17b80bcb67d2ae2841d5829fb06a
