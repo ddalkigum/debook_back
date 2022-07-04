@@ -12,7 +12,7 @@ export default class SlackClient implements ISlackClient {
     try {
       if (!(error instanceof BaseError)) {
         this.web.chat.postMessage({
-          text: `Error\n\rname: ${error.name}\n\rmessage: ${error.message}\n\rstack: ${error.stack}`,
+          text: `Error\n\rname: ${error.name}\n\rmessage: ${error.message}\n\r\`\`\`stack: ${error.stack}\`\`\``,
           channel: 'C03MZ1LUJAG',
         });
       }
