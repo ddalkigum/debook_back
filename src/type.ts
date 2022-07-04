@@ -6,6 +6,7 @@ export const TYPES = {
   MariaDB: Symbol.for('MariaDB'),
   SES: Symbol.for('SES'),
   S3Client: Symbol.for('S3Client'),
+  SlackClient: Symbol.for('SlackClient'),
 
   // Common
   ApiResponse: Symbol.for('ApiResponse'),

@@ -11,12 +11,14 @@ import { IMorganLogger, IWinstonLogger } from '../logger/interface';
 import { IHttpRouter } from '../../domain/interface';
 import { IApiResponse } from '../../common/interface';
 import * as config from '../../config';
+import { ISlackClient } from '../slack/interface';
 
 @injectable()
 export class ExpressServer implements IServer {
   @inject(TYPES.WinstonLogger) private logger: IWinstonLogger;
   @inject(TYPES.MorganLogger) private morganLogger: IMorganLogger;
   @inject(TYPES.ApiResponse) private apiResponse: IApiResponse;
+  @inject(TYPES.SlackClient) private slackClient: ISlackClient;
 
   // Domain
   @inject(TYPES.AuthRouter) private authRouter: IHttpRouter;
@@ -51,6 +53,12 @@ export class ExpressServer implements IServer {
     this.app.use('/v1/party', this.partyRouter.get());
     this.app.use('/v1/image', this.imageRouter.get());
     this.app.use('/v1/user', this.userRouter.get());
+
+    this.app.use(this.apiResponse.generateNotFound);
+
+    if (process.env.NODE_ENV === 'production') {
+      this.app.use(this.slackClient.sendAlaram);
+    }
 
     this.app.use(this.apiResponse.errorResponse);
   };

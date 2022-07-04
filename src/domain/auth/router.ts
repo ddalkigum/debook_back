@@ -7,8 +7,6 @@ import { TYPES } from '../../type';
 import { IHttpRouter } from '../interface';
 import { IAuthService } from './interface';
 import { validateContext } from '../../util/validate';
-import * as config from '../../config';
-import * as util from '../../util';
 import { setCookie, unSetCookie } from '../../util/cookie';
 
 @injectable()

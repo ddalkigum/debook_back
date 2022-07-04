@@ -11,7 +11,6 @@ import { IUserRepository, IUserService } from './domain/user/interface';
 import { IApiResponse } from './common/interface';
 import { IAuthRepository, IAuthService } from './domain/auth/interface';
 import { ISES } from './infrastructure/aws/ses/interface';
-// import { IPartyRepository, IPartyService } from './domain/party/interface';
 import { IMiddleware } from './middleware/interface';
 import * as Logger from './infrastructure/logger';
 import * as Auth from './domain/auth';
@@ -24,6 +23,8 @@ import SES from './infrastructure/aws/ses/ses';
 import S3Client from './infrastructure/aws/s3/s3';
 import { IS3Client } from './infrastructure/aws/s3/interface';
 import { IPartyRepository, IPartyService } from './domain/party/interface';
+import SlackClient from './infrastructure/slack/alaram';
+import { ISlackClient } from './infrastructure/slack/interface';
 
 export const container = new Container({ defaultScope: 'Singleton' });
 
@@ -34,6 +35,7 @@ container.bind<IMorganLogger>(TYPES.MorganLogger).to(Logger.Morgan);
 container.bind<IMariaDB>(TYPES.MariaDB).to(MariaDB);
 container.bind<IS3Client>(TYPES.S3Client).to(S3Client);
 container.bind<ISES>(TYPES.SES).to(SES);
+container.bind<ISlackClient>(TYPES.SlackClient).to(SlackClient);
 
 // Common
 container.bind<IApiResponse>(TYPES.ApiResponse).to(Common.ApiResponse);
