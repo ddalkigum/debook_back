@@ -9,7 +9,7 @@ import { IAuthService } from './interface';
 import { validateContext } from '../../util/validate';
 import * as config from '../../config';
 import * as util from '../../util';
-import { setCookie } from '../../util/cookie';
+import { setCookie, unSetCookie } from '../../util/cookie';
 
 @injectable()
 export default class AuthRouter implements IHttpRouter {
@@ -101,8 +101,7 @@ export default class AuthRouter implements IHttpRouter {
 
     this.router.delete('/logout', async (request: Request, response: Response, next: NextFunction) => {
       this.apiResponse.generateResponse(request, response, next, async () => {
-        response.clearCookie('accessToken');
-        response.clearCookie('refreshToken');
+        unSetCookie(response);
         return 'Success';
       });
     });
