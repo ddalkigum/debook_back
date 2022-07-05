@@ -6,12 +6,14 @@ import { IPartyRepository, IPartyService, RegistPartyContext } from './interface
 import { IUserRepository } from '../user/interface';
 import ErrorGenerator from '../../common/error';
 import * as util from '../../util';
+import { ISES } from '../../infrastructure/aws/ses/interface';
 
 const ITEM_COUNT = 12;
 
 @injectable()
 export default class PartyService implements IPartyService {
   @inject(TYPES.WinstonLogger) private logger: IWinstonLogger;
+  @inject(TYPES.SES) private sesClient: ISES;
   @inject(TYPES.Partyrepository) private partyRepository: IPartyRepository;
   @inject(TYPES.UserRepository) private userRepository: IUserRepository;
 
@@ -60,6 +62,10 @@ export default class PartyService implements IPartyService {
     }
 
     const participant = await this.partyRepository.insertParticipant(userID, partyID, false);
+    // send email to admin
+    const { ownerID } = foundParty;
+    const owner = await this.userRepository.getUserByID(ownerID);
+    await this.sesClient.sendJoinEmail(owner.email);
     return participant;
   };
 
