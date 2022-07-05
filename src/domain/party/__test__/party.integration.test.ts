@@ -12,12 +12,14 @@ import { IUserRepository } from '../../user/interface';
 import { GetPartyDetail, IPartyRepository } from '../interface';
 import PartyEntity from '../../../infrastructure/database/maria/entity/party/party';
 import ParticipantEntity from '../../../infrastructure/database/maria/entity/party/participant';
+import { ISES } from '../../../infrastructure/aws/ses/interface';
 
 const express = container.get<IServer>(TYPES.Server);
 const userRepository = container.get<IUserRepository>(TYPES.UserRepository);
 const authRepository = container.get<IAuthRepository>(TYPES.AuthRepository);
 const partyRepository = container.get<IPartyRepository>(TYPES.Partyrepository);
 const winstonLogger = container.get<IWinstonLogger>(TYPES.WinstonLogger);
+const sesClient = container.get<ISES>(TYPES.SES);
 
 // Mock
 const getBookInfo = jest.spyOn(KakaoApi, 'getBookInfo');
@@ -44,6 +46,7 @@ const updateParty = jest.spyOn(partyRepository, 'updateParty');
 const getPartyDetail = jest.spyOn(partyRepository, 'getPartyDetail');
 const deleteParty = jest.spyOn(partyRepository, 'deleteParty');
 const upload = jest.spyOn(new aws.S3(), 'upload');
+const sendJoinEmail = jest.spyOn(sesClient, 'sendJoinEmail');
 
 express.set();
 const app = express.getServer();
@@ -201,10 +204,13 @@ describe('Search book test', () => {
 });
 
 describe('Party join test', () => {
+  getUserByID.mockResolvedValueOnce(testUser);
+
   test('Success', () => {
     getPartyEntity.mockResolvedValueOnce(testParty.online);
     getParticipant.mockResolvedValueOnce([]);
     insertParticipant.mockResolvedValueOnce(testParticipant.join);
+    sendJoinEmail.mockResolvedValueOnce(null);
 
     return request(app)
       .post('/v1/party/join')
