@@ -36,8 +36,8 @@ export default class AuthService implements IAuthService {
 
     const tokenID = util.uuid.generageUUID();
     const tokenSet = util.token.getAuthTokenSet({ userID: signupUser.id, tokenID }, config.authConfig.issuer);
-    await this.authRepository.insertToken(signupUser.id, tokenID, tokenSet);
 
+    await this.authRepository.insertToken(signupUser.id, tokenID, tokenSet);
     await this.authRepository.deleteCertificationByCode(code);
 
     return { tokenSet, user: signupUser };

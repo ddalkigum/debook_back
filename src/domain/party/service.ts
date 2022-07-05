@@ -8,7 +8,7 @@ import ErrorGenerator from '../../common/error';
 import * as util from '../../util';
 import { ISES } from '../../infrastructure/aws/ses/interface';
 
-const ITEM_COUNT = 12;
+const ITEM_COUNT = 24;
 
 @injectable()
 export default class PartyService implements IPartyService {
