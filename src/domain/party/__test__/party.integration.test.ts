@@ -553,6 +553,7 @@ describe('Get party detail', () => {
 describe('Delete party', () => {
   test('Success', () => {
     getPartyEntity.mockResolvedValueOnce(testParty.online);
+    deleteNotificationOpenChat.mockResolvedValueOnce(null);
     deleteParty.mockResolvedValueOnce();
 
     return request(app)
