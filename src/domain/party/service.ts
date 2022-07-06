@@ -236,6 +236,7 @@ export default class PartyService implements IPartyService {
       throw ErrorGenerator.forbidden('DoesNotMatchedDefinedOwnerID');
     }
 
+    await this.partyRepository.deleteNotificationOpenChat({ partyID });
     await this.partyRepository.deleteParty(partyID);
     return 'Success';
   };
