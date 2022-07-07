@@ -8,7 +8,7 @@ services:
     volumes:
       - ./init:/docker-entrypoint-initdb.d
     environment:
-      MARIADB_DATABASE: 'goback'
+      MARIADB_DATABASE: 'debook'
       MARIADB_HOST: 'localhost'
       MARIADB_USER: 'root'
       MARIADB_ROOT_PASSWORD: '1234'

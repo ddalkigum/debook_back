@@ -1,4 +1,4 @@
-const DEFAULT_JWT_SIGN_KEY = 'goback';
+const DEFAULT_JWT_SIGN_KEY = 'debook';
 
 const authConfig = {
   jwtSignKey: process.env.JWT_SIGN_KEY || DEFAULT_JWT_SIGN_KEY,

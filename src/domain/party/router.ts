@@ -158,7 +158,7 @@ export default class PartyRouter implements IHttpRouter {
               title: Joi.string().min(3).max(20).required(),
               numberOfRecruit: Joi.number().min(2).max(12),
               openChatURL: Joi.string().required(),
-              openChatPassword: Joi.string().optional(),
+              openChatPassword: Joi.string().allow(null, '').optional(),
               region: Joi.string().optional(),
               city: Joi.string().optional(),
               town: Joi.string().optional(),

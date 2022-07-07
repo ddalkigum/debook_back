@@ -22,7 +22,7 @@ export default class PartyEntity extends DateTimeEntity {
   @Column({ type: 'varchar' })
   openChatURL: string;
 
-  @Column({ type: 'varchar' })
+  @Column({ type: 'varchar', nullable: true })
   openChatPassword: string;
 
   @Column({ type: 'boolean' })
