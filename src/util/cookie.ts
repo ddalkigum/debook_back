@@ -15,7 +15,7 @@ export const setCookie = (response: Response, accessToken: string, refreshToken?
       response.cookie('refreshToken', refreshToken, {
         domain,
         httpOnly: true,
-        maxAge: config.authConfig.maxAge.accessToken,
+        maxAge: config.authConfig.maxAge.refreshToken,
       });
     }
   });
