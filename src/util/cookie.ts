@@ -1,7 +1,7 @@
 import { Response } from 'express';
 import * as config from '../config';
 
-const domainList = ['.debbok.me', undefined];
+const domainList = ['.debook.me', undefined];
 
 export const setCookie = (response: Response, accessToken: string, refreshToken?: string) => {
   domainList.forEach((domain) => {
