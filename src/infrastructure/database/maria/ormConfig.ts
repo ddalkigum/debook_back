@@ -4,7 +4,7 @@ import * as config from '../../../config';
 
 const MARIA_DB = 'mariadb';
 const { NODE_ENV } = process.env;
-const TEST_DATABASE = 'goback_test';
+const TEST_DATABASE = 'debook_test';
 
 export const dataSource = new DataSource({
   type: MARIA_DB,
