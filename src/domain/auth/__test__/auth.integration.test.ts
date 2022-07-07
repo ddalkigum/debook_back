@@ -12,11 +12,13 @@ import { IServer } from '../../../infrastructure/express/interface';
 import { ISES } from '../../../infrastructure/aws/ses/interface';
 import TokenEntity from '../../../infrastructure/database/maria/entity/auth/token';
 import { IMiddleware } from '../../../middleware/interface';
+import { INotifyRepository } from '../../notify/interface';
 
 const express = container.get<IServer>(TYPES.Server);
 const winstonLogger = container.get<IWinstonLogger>(TYPES.WinstonLogger);
 const userRepository = container.get<IUserRepository>(TYPES.UserRepository);
 const authRepository = container.get<IAuthRepository>(TYPES.AuthRepository);
+const notifyRepository = container.get<INotifyRepository>(TYPES.NotifyRepository);
 const sesClient = container.get<ISES>(TYPES.SES);
 const middleware = container.get<IMiddleware>(TYPES.Middleware);
 
@@ -39,6 +41,9 @@ const sendAuthEmail = jest.spyOn(sesClient, 'sendAuthEmail');
 const getUserByNickname = jest.spyOn(userRepository, 'getUserByNickname');
 const getUserByEmail = jest.spyOn(userRepository, 'getUserByEmail');
 const insertUser = jest.spyOn(userRepository, 'insertUser');
+
+// Notify
+const insertNotify = jest.spyOn(notifyRepository, 'insert');
 
 // Middleware
 const testUser = {
@@ -116,6 +121,7 @@ describe('Email signin test', () => {
     getTokenByUserID.mockResolvedValueOnce(safeTokenEntity);
     updateToken.mockResolvedValueOnce(safeTokenEntity);
     deleteCertificationByCode.mockResolvedValueOnce();
+    insertNotify.mockResolvedValueOnce(null);
 
     return request(app)
       .get('/v1/auth/signin/email?code=code')

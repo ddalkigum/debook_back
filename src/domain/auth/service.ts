@@ -9,6 +9,7 @@ import { ISES } from '../../infrastructure/aws/ses/interface';
 import ErrorGenerator from '../../common/error';
 import * as util from '../../util';
 import * as config from '../../config';
+import { INotifyRepository } from '../notify/interface';
 
 const GOOGLE_AUTH_URL = 'https://accounts.google.com/o/oauth2/v2/auth';
 const GOOGLE_AUTH_TOKEN_URL = 'https://oauth2.googleapis.com/token';
@@ -19,6 +20,7 @@ export default class AuthService implements IAuthService {
   @inject(TYPES.WinstonLogger) private logger: IWinstonLogger;
   @inject(TYPES.AuthRepository) private authRepository: IAuthRepository;
   @inject(TYPES.UserRepository) private userRepository: IUserRepository;
+  @inject(TYPES.NotifyRepository) private notifyRepository: INotifyRepository;
   @inject(TYPES.SES) private sesClient: ISES;
 
   public emailSignup = async (code: string, email: string, nickname: string) => {
@@ -39,6 +41,9 @@ export default class AuthService implements IAuthService {
 
     await this.authRepository.insertToken(signupUser.id, tokenID, tokenSet);
     await this.authRepository.deleteCertificationByCode(code);
+
+    const notifyID = util.uuid.generageUUID();
+    await this.notifyRepository.insert({ id: notifyID, type: 'openChat', isOff: false, userID: signupUser.id });
 
     return { tokenSet, user: signupUser };
   };
