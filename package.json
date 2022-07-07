@@ -13,7 +13,11 @@
     "test:unit": "export NODE_ENV=test && jest --config jest.unit.config.json --detectOpenHandles",
     "test:integration": "export NODE_ENV=test && jest --config jest.integration.config.json --detectOpenHandles",
     "docker:start": "docker-compose up -d",
-    "docker:stop": "docker-compose down"
+    "docker:stop": "docker-compose down",
+    "migration": "export NODE_ENV=production && npx typeorm-ts-node-commonjs migration:run -d src/infrastructure/database/maria/ormConfig.ts",
+    "migration:local": "export NODE_ENV=local && npx typeorm-ts-node-commonjs migration:run -d src/infrastructure/database/maria/ormConfig.ts",
+    "migration:revert": "export NODE_ENV=production && npx typeorm-ts-node-commonjs migration:revert -d src/infrastructure/database/maria/ormConfig.ts",
+    "migration:revert:local": "export NODE_ENV=production && npx typeorm-ts-node-commonjs migration:revert -d src/infrastructure/database/maria/ormConfig.ts"
   },
   "author": "",
   "license": "ISC",
