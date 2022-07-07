@@ -25,6 +25,7 @@ export class ExpressServer implements IServer {
   @inject(TYPES.PartyRouter) private partyRouter: IHttpRouter;
   @inject(TYPES.ImageRouter) private imageRouter: IHttpRouter;
   @inject(TYPES.UserRouter) private userRouter: IHttpRouter;
+  @inject(TYPES.NotifyRouter) private notifyRouter: IHttpRouter;
 
   private app: express.Application = express();
 
@@ -44,6 +45,7 @@ export class ExpressServer implements IServer {
     this.partyRouter.init();
     this.imageRouter.init();
     this.userRouter.init();
+    this.notifyRouter.init();
 
     this.app.get('/health', (request, response, next) => {
       response.send('Success');
@@ -53,6 +55,7 @@ export class ExpressServer implements IServer {
     this.app.use('/v1/party', this.partyRouter.get());
     this.app.use('/v1/image', this.imageRouter.get());
     this.app.use('/v1/user', this.userRouter.get());
+    this.app.use('/v1/notify', this.notifyRouter.get());
 
     this.app.use(this.apiResponse.generateNotFound);
 

@@ -41,8 +41,6 @@ const getUserByEmail = jest.spyOn(userRepository, 'getUserByEmail');
 const insertUser = jest.spyOn(userRepository, 'insertUser');
 
 // Middleware
-const authorization = jest.spyOn(middleware, 'authorization');
-
 const testUser = {
   id: 1,
   email: 'sol35352000@gmail.com',

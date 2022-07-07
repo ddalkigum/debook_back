@@ -3,7 +3,7 @@ import { Constants } from '../../../../../constants';
 import UserEntity from '../user/user';
 
 @Entity({ name: Constants.NOTIFY_TABLE })
-export default class NotificationOpenChatEntity {
+export default class NotifyEntity {
   @PrimaryColumn({ type: 'varchar', length: 36 })
   id: string;
 
