@@ -55,7 +55,7 @@ export const getAuthEmailTemplate = (
         Data: `Debook${emailTitle}`,
       },
     },
-    Source: config.awsConfig.adminEmail,
+    Source: config.awsConfig.email.auth,
   };
 };
 
@@ -105,6 +105,6 @@ export const joinEmailTemplate = (userEmail: string): SendEmailCommandInput => {
         Data: `Debook 그룹 가입 신청`,
       },
     },
-    Source: config.awsConfig.adminEmail,
+    Source: config.awsConfig.email.noti,
   };
 };
