@@ -37,7 +37,7 @@ afterAll(() => {
 const testNotify = {
   id: util.uuid.generageUUID(),
   type: 'openChat',
-  isOff: true,
+  isActive: true,
   userID: 1,
 };
 
@@ -63,7 +63,7 @@ describe('Update test', () => {
     return request(app)
       .patch('/v1/notify')
       .set('Cookie', `accessToken=${tokenSet.accessToken}`)
-      .send({ type: 'openChat', isOff: true })
+      .send({ type: 'openChat', isActive: true })
       .expect((response) => {
         const { status, result } = response.body;
         expect(status).toEqual('Success');
@@ -77,7 +77,7 @@ describe('Update test', () => {
     return request(app)
       .patch('/v1/notify')
       .set('Cookie', `accessToken=${tokenSet.accessToken}`)
-      .send({ type: 'openchat', isOff: true })
+      .send({ type: 'openchat', isActive: true })
       .expect((response) => {
         const { status, result } = response.body;
         expect(status).toEqual('Error');
