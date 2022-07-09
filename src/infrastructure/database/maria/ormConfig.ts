@@ -14,7 +14,7 @@ export const dataSource = new DataSource({
   host: config.dbConfig.host,
   port: config.dbConfig.port,
   charset: 'utf8mb4',
-  synchronize: false,
+  synchronize: NODE_ENV === 'test' ? true : false,
   entities: [path.join(__dirname, './entity/**/*.{ts,js}')],
-  migrations: [path.join(__dirname, './migration/*.ts')]
+  migrations: [path.join(__dirname, './migration/*.ts')],
 });
