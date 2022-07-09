@@ -14,4 +14,5 @@ export enum Constants {
   AVAILABLE_DAY_TABLE = 'availableDay',
   BOOK_TABLE = 'book',
   NOTIFICATION_OPEN_CHAT_TABLE = 'openChat',
+  NOTIFY_TABLE = 'notify',
 }

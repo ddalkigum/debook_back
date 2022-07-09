@@ -30,4 +30,9 @@ export const TYPES = {
 
   // Image
   ImageRouter: Symbol.for('ImageRouter'),
+
+  // Notify
+  NotifyRouter: Symbol.for('NotifyRouter'),
+  NotifyService: Symbol.for('NotifyService'),
+  NotifyRepository: Symbol.for('NotifyRepository'),
 };

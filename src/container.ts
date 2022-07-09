@@ -7,9 +7,7 @@ import { IMorganLogger, IWinstonLogger } from './infrastructure/logger/interface
 import { IMariaDB } from './infrastructure/database/maria/interface';
 import MariaDB from './infrastructure/database/maria/mariaDB';
 import { IHttpRouter } from './domain/interface';
-import { IUserRepository, IUserService } from './domain/user/interface';
 import { IApiResponse } from './common/interface';
-import { IAuthRepository, IAuthService } from './domain/auth/interface';
 import { ISES } from './infrastructure/aws/ses/interface';
 import { IMiddleware } from './middleware/interface';
 import * as Logger from './infrastructure/logger';
@@ -19,10 +17,14 @@ import * as Party from './domain/party';
 import * as Common from './common';
 import * as Middleware from './middleware/middleware';
 import * as Image from './domain/image';
+import * as Notify from './domain/notify';
 import SES from './infrastructure/aws/ses/ses';
 import S3Client from './infrastructure/aws/s3/s3';
 import { IS3Client } from './infrastructure/aws/s3/interface';
+import { IAuthRepository, IAuthService } from './domain/auth/interface';
 import { IPartyRepository, IPartyService } from './domain/party/interface';
+import { IUserRepository, IUserService } from './domain/user/interface';
+import { INotifyRepository, INotifyService } from './domain/notify/interface';
 import SlackClient from './infrastructure/slack/alaram';
 import { ISlackClient } from './infrastructure/slack/interface';
 
@@ -59,3 +61,8 @@ container.bind<IUserRepository>(TYPES.UserRepository).to(User.Repository);
 
 // Imgae
 container.bind<IHttpRouter>(TYPES.ImageRouter).to(Image.Router);
+
+// Notify
+container.bind<IHttpRouter>(TYPES.NotifyRouter).to(Notify.Router);
+container.bind<INotifyService>(TYPES.NotifyService).to(Notify.Service);
+container.bind<INotifyRepository>(TYPES.NotifyRepository).to(Notify.Repository);

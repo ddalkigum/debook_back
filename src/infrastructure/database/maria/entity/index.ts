@@ -7,3 +7,4 @@ export { default as Day } from './party/day';
 export { default as Participant } from './party/participant';
 export { default as Party } from './party/party';
 export { default as OpenChat } from './notification/openChat';
+export { default as Notify } from './notification/notify';
