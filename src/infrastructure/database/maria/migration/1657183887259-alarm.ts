@@ -17,7 +17,7 @@ export class src1657183887259 implements MigrationInterface {
           length: '20',
         },
         {
-          name: 'isOff',
+          name: 'isActive',
           type: 'boolean',
           default: 0,
         },
