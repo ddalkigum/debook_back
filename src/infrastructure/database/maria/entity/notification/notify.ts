@@ -10,8 +10,8 @@ export default class NotifyEntity {
   @Column({ type: 'varchar', length: 20 })
   type: string;
 
-  @Column({ type: 'boolean', default: false })
-  isOff: boolean;
+  @Column({ type: 'boolean', default: true })
+  isActive: boolean;
 
   @ManyToOne(() => UserEntity, (user) => user.id, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'userID' })

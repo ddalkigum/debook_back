@@ -8,7 +8,7 @@ export class src1657183887259 implements MigrationInterface {
         {
           name: 'id',
           type: 'varchar',
-          length: '32',
+          length: '36',
           isPrimary: true,
         },
         {
@@ -40,6 +40,8 @@ export class src1657183887259 implements MigrationInterface {
         onDelete: 'CASCADE',
       })
     );
+
+    await queryRunner.dropForeignKey('certification', 'IDX_716aee59ee337fe7c3967a34e0');
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {

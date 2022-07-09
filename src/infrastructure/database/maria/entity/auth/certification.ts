@@ -17,7 +17,6 @@ export default class CertificationEntity {
   @Column({ type: 'boolean' })
   isSignup: boolean;
 
-  @Index()
   @Column({ type: 'datetime' })
   deleteTime: string;
 }

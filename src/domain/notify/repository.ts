@@ -17,12 +17,14 @@ export default class NotifyRepository implements INotifyRepository {
   };
 
   public getNotifyList = async (userID: number) => {
-    this.logger.debug(`NotifyService, getNotifyList`);
+    this.logger.debug(`NotifyRepository, getNotifyList, userID: ${userID}`);
     return await this.mariaDB.findByColumn<NotifyEntity>(Constants.NOTIFY_TABLE, { userID });
   };
 
   public update = async (userID: number, updateCondition: Partial<NotifyEntity>) => {
-    this.logger.debug(`NotifyService, updateNotify`);
+    this.logger.debug(
+      `NotifyRepository, updateNotify, userID: ${userID}, updateCondition: ${JSON.stringify(updateCondition)}`
+    );
     return await this.mariaDB.updateByColumn<NotifyEntity>(Constants.NOTIFY_TABLE, { userID }, updateCondition);
   };
 }

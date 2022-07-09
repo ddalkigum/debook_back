@@ -39,16 +39,16 @@ export default class NotifyRouter implements IHttpRouter {
       this.middleware.authorization,
       async (request: Request, response: Response, next: NextFunction) => {
         this.apiResponse.generateResponse(request, response, next, async () => {
-          const { userID, type, isOff } = request.body;
+          const { userID, type, isActive } = request.body;
 
           const schema = Joi.object({
             userID: Joi.number().required(),
             type: Joi.string().valid('openChat').required(),
-            isOff: Joi.boolean().required(),
+            isActive: Joi.boolean().required(),
           });
 
           validateContext(request.body, schema);
-          return await this.notifyService.updateNotify(userID, { type, isOff });
+          return await this.notifyService.updateNotify(userID, { type, isActive });
         });
       }
     );

@@ -11,6 +11,7 @@ import { IMorganLogger, IWinstonLogger } from '../logger/interface';
 import { IHttpRouter } from '../../domain/interface';
 import { IApiResponse } from '../../common/interface';
 import * as config from '../../config';
+import * as util from '../../util';
 import { ISlackClient } from '../slack/interface';
 
 @injectable()
@@ -67,6 +68,7 @@ export class ExpressServer implements IServer {
   };
 
   public start = (port: string) => {
+    console.log(util.uuid.generageUUID());
     if (process.env.SERVER_TYPE) {
       const keyFile = fs.readFileSync('pem/localhost-key.pem');
       const certFile = fs.readFileSync('pem/localhost.pem');

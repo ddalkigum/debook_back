@@ -43,7 +43,7 @@ export default class AuthService implements IAuthService {
     await this.authRepository.deleteCertificationByCode(code);
 
     const notifyID = util.uuid.generageUUID();
-    await this.notifyRepository.insert({ id: notifyID, type: 'openChat', isOff: false, userID: signupUser.id });
+    await this.notifyRepository.insert({ id: notifyID, type: 'openChat', isActive: false, userID: signupUser.id });
 
     return { tokenSet, user: signupUser };
   };

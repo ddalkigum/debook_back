@@ -37,6 +37,9 @@ const getEntity = <T>(tableName: Constants): EntityTarget<T> => {
 
     case Constants.NOTIFICATION_OPEN_CHAT_TABLE:
       return Entity.OpenChat;
+
+    case Constants.NOTIFY_TABLE:
+      return Entity.Notify;
   }
 };
 
