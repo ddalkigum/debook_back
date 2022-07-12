@@ -1,5 +1,6 @@
 import multer from 'multer';
 import fs from 'fs';
+import sharp from 'sharp';
 import { NextFunction, Request, Response, Router } from 'express';
 import { inject, injectable } from 'inversify';
 import { IApiResponse } from '../../common/interface';
@@ -37,6 +38,7 @@ export default class ImageRouter implements IHttpRouter {
         await this.apiResponse.generateResponse(request, response, next, async () => {
           const s3 = this.s3Client.get();
           const { filename, mimetype } = request.file;
+
           const imageFileExtention = mimetype.split('/')[1];
 
           if (imageFileExtention !== 'png' && imageFileExtention !== 'jpg' && imageFileExtention !== 'jpeg') {
@@ -45,13 +47,27 @@ export default class ImageRouter implements IHttpRouter {
 
           const imageFile = fs.readFileSync(`image/${filename}`);
           const { user, type } = request.body;
+
+          const metadata = await sharp(imageFile).metadata();
+          const { width } = metadata;
+
+          let uploadFile = imageFile;
+
+          if (type === 'profile' && width > 120) {
+            uploadFile = await sharp(imageFile).resize(120).toBuffer();
+          }
+
+          if (type === 'party' && width > 775) {
+            uploadFile = await sharp(imageFile).resize(775).toBuffer();
+          }
+
           const parsedUser = JSON.parse(user);
           const fileID = util.uuid.generageUUID();
           const upload: any = s3.upload(
             {
               Bucket: config.awsConfig.bucketName,
               Key: `image/${type}/${parsedUser.nickname}/${fileID}.${imageFileExtention}`,
-              Body: imageFile,
+              Body: uploadFile,
               ContentType: mimetype,
             },
             (error, data) => {
